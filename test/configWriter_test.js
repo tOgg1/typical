@@ -34,9 +34,9 @@ describe('configWriter', () => {
     }
 
     configWriter.write(config)
-    const expectedFile1 = path.resolve(cwd, 'test1_file1.txt');
-    const expectedFile2 = path.resolve(cwd, 'test1_file2.txt');
-    const expectedDirectory1 = path.resolve(cwd, 'test1_dir1');
+    const expectedFile1 = path.resolve(cwd, 'test1_file1.txt')
+    const expectedFile2 = path.resolve(cwd, 'test1_file2.txt')
+    const expectedDirectory1 = path.resolve(cwd, 'test1_dir1')
     const expectedSubfile1 = path.resolve(cwd, 'test1_dir1/test1_file3.txt')
 
     expect(fs.existsSync(expectedFile1)).to.equal(true)
@@ -53,7 +53,7 @@ describe('configWriter', () => {
     const expectedFile2 = path.resolve(cwd, 'file2')
     expect(fs.existsSync(expectedFile1)).to.equal(true)
     expect(fs.existsSync(expectedFile2)).to.equal(true)
-  });
+  })
   it('should write a folder config file', () => {
     const config = {
       path1: {
