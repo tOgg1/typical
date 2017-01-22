@@ -18,11 +18,11 @@ describe('configWriter', () => {
           }
         },
         path2: {
-          file1: 'content1',
-          subpath1: {
-            file2: 'content2',
-            subsubpath1: {
-              file3: 'content3'
+          sub: {
+            sub: {
+              path: {
+                file: ''
+              }
             }
           }
         }
@@ -34,19 +34,18 @@ describe('configWriter', () => {
   })
   it('should write a regular config file', () => {
     const config = {
-      files: ['test1_file1.txt', 'test1_file2.txt'],
-      directories: {
-        test1_dir1: {
-          files: ['test1_file3.txt']
-        }
+      'file1': '',
+      'file2': '',
+      'dir1': {
+        'file3': ''
       }
     }
 
     configWriter.write(config)
-    const expectedFile1 = path.resolve(cwd, 'test1_file1.txt')
-    const expectedFile2 = path.resolve(cwd, 'test1_file2.txt')
-    const expectedDirectory1 = path.resolve(cwd, 'test1_dir1')
-    const expectedSubfile1 = path.resolve(cwd, 'test1_dir1/test1_file3.txt')
+    const expectedFile1 = path.resolve(cwd, 'file1')
+    const expectedFile2 = path.resolve(cwd, 'file2')
+    const expectedDirectory1 = path.resolve(cwd, 'dir1')
+    const expectedSubfile1 = path.resolve(cwd, 'dir1/file3')
 
     expect(fs.existsSync(expectedFile1)).to.equal(true)
     expect(fs.existsSync(expectedFile2)).to.equal(true)
@@ -64,6 +63,13 @@ describe('configWriter', () => {
     expect(fs.existsSync(expectedFile2)).to.equal(true)
   })
   it('should write a folder config file', (done) => {
+    // path1: {
+    //   file1: 'content1',
+    //   subpath1: {
+    //     subfile1: 'content2',
+    //     subfile2: 'content3'
+    //   }
+    // }
     const config = {
       path1: {
         path: '.typicalfolders/path1',
@@ -84,14 +90,14 @@ describe('configWriter', () => {
   })
   it('should write a folder config file with greater depth', (done) => {
     // path2: {
-    //   file1: 'content1',
-    //   subpath1: {
-    //     file2: 'content2',
-    //     subsubpath1: {
-    //       file3: 'content3'
+    //   sub: {
+    //     sub: {
+    //       path: {
+    //         file: ''
+    //       }
     //     }
     //   }
-    // },
+    // }
     const config = {
       path2: {
         path: '.typicalfolders/path2',
@@ -99,17 +105,9 @@ describe('configWriter', () => {
       }
     }
     configWriter.write(config.path2, () => {
-      const expectedFile1 = path.resolve(cwd, 'file1')
-      const expectedFile2 = path.resolve(cwd, 'subpath1/file2')
-      const expectedFolder1 = path.resolve(cwd, 'subpath1')
-      const expectedFolder2 = path.resolve(cwd, 'subpath1/subsubpath1')
-      const expectedFile3 = path.resolve(cwd, 'subpath1/subsubpath1/file3')
+      const expectedFile = path.resolve(cwd, 'sub/sub/path/file')
 
-      expect(fs.existsSync(expectedFile1)).to.equal(true)
-      expect(fs.existsSync(expectedFile2)).to.equal(true)
-      expect(fs.existsSync(expectedFile3)).to.equal(true)
-      expect(fs.existsSync(expectedFolder1)).to.equal(true)
-      expect(fs.existsSync(expectedFolder2)).to.equal(true)
+      expect(fs.existsSync(expectedFile)).to.equal(true)
       done()
     })
   })
