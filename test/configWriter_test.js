@@ -16,6 +16,15 @@ describe('configWriter', () => {
             subfile1: 'content2',
             subfile2: 'content3'
           }
+        },
+        path2: {
+          file1: 'content1',
+          subpath1: {
+            file2: 'content2',
+            subsubpath1: {
+              file3: 'content3'
+            }
+          }
         }
       }
     })
@@ -54,7 +63,7 @@ describe('configWriter', () => {
     expect(fs.existsSync(expectedFile1)).to.equal(true)
     expect(fs.existsSync(expectedFile2)).to.equal(true)
   })
-  it('should write a folder config file', () => {
+  it('should write a folder config file', (done) => {
     const config = {
       path1: {
         path: '.typicalfolders/path1',
@@ -70,6 +79,38 @@ describe('configWriter', () => {
       expect(fs.existsSync(expectedFolder1)).to.equal(true)
       expect(fs.existsSync(expectedSubfile1)).to.equal(true)
       expect(fs.existsSync(expectedSubfile2)).to.equal(true)
+      done()
+    })
+  })
+  it('should write a folder config file with greater depth', (done) => {
+    // path2: {
+    //   file1: 'content1',
+    //   subpath1: {
+    //     file2: 'content2',
+    //     subsubpath1: {
+    //       file3: 'content3'
+    //     }
+    //   }
+    // },
+    const config = {
+      path2: {
+        path: '.typicalfolders/path2',
+        isDirectory: true
+      }
+    }
+    configWriter.write(config.path2, () => {
+      const expectedFile1 = path.resolve(cwd, 'file1')
+      const expectedFile2 = path.resolve(cwd, 'subpath1/file2')
+      const expectedFolder1 = path.resolve(cwd, 'subpath1')
+      const expectedFolder2 = path.resolve(cwd, 'subpath1/subsubpath1')
+      const expectedFile3 = path.resolve(cwd, 'subpath1/subsubpath1/file3')
+
+      expect(fs.existsSync(expectedFile1)).to.equal(true)
+      expect(fs.existsSync(expectedFile2)).to.equal(true)
+      expect(fs.existsSync(expectedFile3)).to.equal(true)
+      expect(fs.existsSync(expectedFolder1)).to.equal(true)
+      expect(fs.existsSync(expectedFolder2)).to.equal(true)
+      done()
     })
   })
 })
