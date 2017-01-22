@@ -24,21 +24,21 @@ The .typicalrc file must be a JSON-file on the following format:
 ```
 {
   "<configEntry>": {
-    "files": Array|Object,
-    "directories": Object
+    "<file>": String|Object
   }
 }
 ```
+
+If the value of a file-key is a string, a new regular file with the value as contents. If the value is an object,
+a new directory will be created.
 
 The most minimal working .typicalrc configuration file with both files and directories, would be along the lines of:
 ```json
 {
   "entry": {
-    "files": ["file1"],
-    "directories": {
-      "dir1": {
-        "files": ["file2"]
-      }
+    "file": "File contents",
+    "dir": {
+      "file2: "File 2 contents"
     }
   }
 }
@@ -48,12 +48,15 @@ With this configuration, running `typical entry` yields
 
 ```
 .
-├── dir1
+├── dir
 │   └── file2
-└── file1
+└── file
 ```
-
 
 ## .typicalfolders configuration
 
 ## TODO
+
+ * Support YAML-config
+ * Variable interpolation in boilerplates
+ * Support symbolic links in  .typicalrc files
