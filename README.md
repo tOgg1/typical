@@ -41,7 +41,7 @@ The most minimal working .typicalrc configuration file with both files and direc
   "entry": {
     "file": "File contents",
     "dir": {
-      "file2: "File 2 contents"
+      "file2": "File 2 contents"
     }
   }
 }
@@ -56,7 +56,41 @@ With this configuration, running `typical entry` yields
 └── file
 ```
 
+When typical is called, it will look for a .typicalrc folder as specified by [find-config](https://github.com/shannonmoeller/find-config).
+
 ## .typicalfolders configuration
+
+The second configuration option to typical, is to create a `.typicalfolders` folder somewhere in the path of your working directory. 
+
+The .typicalfolders folder is expected to contain a set of subdirectories (and no files). When loading config from a .typicalfolders folder, the names of these subdirectories will be the configElement-keys, and their contents will be the values of these.
+
+For instance, if we have a directory-structure as follows:
+
+```
+.
+└── .typicalfolders
+    └── html-boilerplate
+        ├── favicon.ico
+        └── index.html
+```
+
+then invoking `typical html-boilerplate` would generate the two files `favicon.ico` and `index.html` in the current working directory.
+
+### Using .typicalfolders as a storage for your favourite boilerplates
+
+By creating a .typicalfolders folder in e.g. your home directory, you can use it to store any boilerplate you would like, later to be invoked by the `typical` command.
+
+Say for instance we want to have [this html5 boilerplate](https://github.com/h5bp/html5-boilerplate) at our disposition at all times. This can be accomplished by running:
+
+```
+cd ~ && mkdir .typicalfolders && cd .typicalfolders
+git clone https://github.com/h5bp/html5-boilerplate
+```
+Now we can run `typical html5-boilerplate` at some empty directory to instantiate it with the html5-boilerplate directory.
+
+Note that this will also copy any "hidden" file, such as the .git directory, which you might want to delete.
+
+When typical is called, it will look for a .typicalfolders folder as specified by [find-config](https://github.com/shannonmoeller/find-config).
 
 ## TODO
 
