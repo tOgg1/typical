@@ -1,4 +1,7 @@
+[![NPM version](https://img.shields.io/badge/npm-v0.3.0-blue.svg)](https://www.npmjs.com/package/typical.js)
+[![Build Status](https://travis-ci.org/tOgg1/typical.svg?branch=develop)](https://travis-ci.org/tOgg1/typical)
 # Typical
+
 Typical is a simple CLI tool that enables you to quickly instantiate common directory structures. It also provides a systematic approach to storing your favourite boilerplates.
 
 ## Quick start
