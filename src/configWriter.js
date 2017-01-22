@@ -38,7 +38,11 @@ function writeFolderConfig (config, callback) {
   const folderFiles = fs.readdirSync(loadFromPath)
   let countdown = folderFiles.length
   const beforeCallback = _ => {
-    if (--countdown === 0) callback()
+    if (--countdown === 0) {
+      if (callback) {
+        callback()
+      }
+    }
   }
   folderFiles.forEach(file => {
     ncp(path.resolve(loadFromPath, file), process.cwd(), error => {
