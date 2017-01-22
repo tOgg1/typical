@@ -11,47 +11,28 @@ function writeFile (path, content) {
   })
 }
 
-function writeFiles (parentDirectory, files) {
-  if (!files) {
-    return
-  }
-  if (files.constructor === Array) {
-    files.forEach(file => writeFile(path.resolve(parentDirectory, file), ''))
-  } else if (files.constructor === Object) {
-    Object.keys(files).forEach(name => {
-      writeFile(name, files[name])
-    })
-  }
-}
-
 function writeDirectory (parentDirectory, directoryObject) {
-  writeFiles(parentDirectory, directoryObject.files)
-  if (!directoryObject.directories) return
-  Object.keys(directoryObject.directories).forEach(directory => {
-    const newParentDirectory = parentDirectory + '/' + directory
-    fs.mkdirSync(newParentDirectory)
-    writeDirectory(newParentDirectory, directoryObject.directories[directory])
+  Object.keys(directoryObject).forEach(fileName => {
+    const fileObject = directoryObject[fileName]
+    if (typeof fileObject === 'string') {
+      writeFile(path.resolve(parentDirectory, fileName), fileObject)
+    } else if (fileObject.constructor === Object) {
+      const directoryPath = path.resolve(parentDirectory, fileName)
+      fs.mkdirSync(directoryPath)
+      writeDirectory(directoryPath, fileObject)
+    }
   })
 }
 
 function writeFolderConfig (config, callback) {
   const loadFromPath = config.path
-  const folderFiles = fs.readdirSync(loadFromPath)
-  let countdown = folderFiles.length
-  const beforeCallback = _ => {
-    if (--countdown === 0) {
-      if (callback) {
-        callback()
-      }
+  ncp(loadFromPath, cwd, error => {
+    if (error) {
+      throw error
     }
-  }
-  folderFiles.forEach(file => {
-    ncp(path.resolve(loadFromPath, file), path.resolve(cwd, file), error => {
-      if (error) {
-        throw error
-      }
-      beforeCallback()
-    })
+    if (callback) {
+      callback()
+    }
   })
 }
 
