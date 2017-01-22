@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 let program = require('commander')
 let configResolver = require('./src/configResolver')
 let configWriter = require('./src/configWriter')
