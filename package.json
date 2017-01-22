@@ -7,7 +7,8 @@
     "test": "mocha test"
   },
   "bin": {
-    "typical": "index.js"
+    "typical": "index.js",
+    "typical-init": "init.js"
   },
   "preferGlobal": true,
   "author": "Tormod Haugland",
