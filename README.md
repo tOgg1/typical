@@ -21,11 +21,11 @@ If no arguments is supplied to `typical`, it will look for an entry called `_def
 ## Basic .typicalrc configuration
 
 The .typicalrc file must be a JSON-file on the following format:
-```json
+```
 {
-  <configEntry>: {
-    files: Array|Object,
-    directories: Object
+  "<configEntry>": {
+    "files": Array|Object,
+    "directories": Object
   }
 }
 ```
@@ -37,7 +37,7 @@ The most minimal working .typicalrc configuration file with both files and direc
     "files": ["file1"],
     "directories": {
       "dir1": {
-        files: ["file2"]
+        "files": ["file2"]
       }
     }
   }
