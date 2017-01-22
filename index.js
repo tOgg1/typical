@@ -23,5 +23,8 @@ let config = Object.assign(
 )
 
 // Lets go.
+if (!config[configElement]) {
+  throw Error('Found no element ' + configElement + ' in config')
+}
 configWriter.write(config[configElement])
 
