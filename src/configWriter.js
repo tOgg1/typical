@@ -35,11 +35,18 @@ function writeDirectory (parentDirectory, directoryObject) {
 
 function writeFolderConfig (config, callback) {
   const loadFromPath = config.path
-  ncp(loadFromPath, process.cwd(), error => {
-    if (error) {
-      throw error
-      callback()
-    }
+  const folderFiles = fs.readdirSync(loadFromPath)
+  let countdown = folderFiles.length
+  const beforeCallback = _ => {
+    if (--countdown === 0) callback()
+  }
+  folderFiles.forEach(file => {
+    ncp(path.resolve(loadFromPath, file), process.cwd(), error => {
+      if (error) {
+        throw error
+      }
+      beforeCallback()
+    })
   })
 }
 
