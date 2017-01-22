@@ -1,4 +1,7 @@
+[![NPM version](https://img.shields.io/badge/npm-v0.3.0-blue.svg)](https://www.npmjs.com/package/typical.js)
+[![Build Status](https://travis-ci.org/tOgg1/typical.svg?branch=develop)](https://travis-ci.org/tOgg1/typical)
 # Typical
+
 Typical is a simple CLI tool that enables you to quickly instantiate common directory structures. It also provides a systematic approach to storing your favourite boilerplates.
 
 ## Quick start
@@ -24,21 +27,21 @@ The .typicalrc file must be a JSON-file on the following format:
 ```
 {
   "<configEntry>": {
-    "files": Array|Object,
-    "directories": Object
+    "<file>": String|Object
   }
 }
 ```
+
+If the value of a file-key is a string, a new regular file with the value as contents. If the value is an object,
+a new directory will be created.
 
 The most minimal working .typicalrc configuration file with both files and directories, would be along the lines of:
 ```json
 {
   "entry": {
-    "files": ["file1"],
-    "directories": {
-      "dir1": {
-        "files": ["file2"]
-      }
+    "file": "File contents",
+    "dir": {
+      "file2": "File 2 contents"
     }
   }
 }
@@ -48,12 +51,49 @@ With this configuration, running `typical entry` yields
 
 ```
 .
-├── dir1
+├── dir
 │   └── file2
-└── file1
+└── file
 ```
 
+When typical is called, it will look for a .typicalrc folder as specified by [find-config](https://github.com/shannonmoeller/find-config).
 
 ## .typicalfolders configuration
 
+The second configuration option to typical, is to create a `.typicalfolders` folder somewhere in the path of your working directory. 
+
+The .typicalfolders folder is expected to contain a set of subdirectories (and no files). When loading config from a .typicalfolders folder, the names of these subdirectories will be the configElement-keys, and their contents will be the values of these.
+
+For instance, if we have a directory-structure as follows:
+
+```
+.
+└── .typicalfolders
+    └── html-boilerplate
+        ├── favicon.ico
+        └── index.html
+```
+
+then invoking `typical html-boilerplate` would generate the two files `favicon.ico` and `index.html` in the current working directory.
+
+### Using .typicalfolders as a storage for your favourite boilerplates
+
+By creating a .typicalfolders folder in e.g. your home directory, you can use it to store any boilerplate you would like, later to be invoked by the `typical` command.
+
+Say for instance we want to have [this html5 boilerplate](https://github.com/h5bp/html5-boilerplate) at our disposition at all times. This can be accomplished by running:
+
+```
+cd ~ && mkdir .typicalfolders && cd .typicalfolders
+git clone https://github.com/h5bp/html5-boilerplate
+```
+Now we can run `typical html5-boilerplate` at some empty directory to instantiate it with the html5-boilerplate directory.
+
+Note that this will also copy any "hidden" file, such as the .git directory, which you might want to delete.
+
+When typical is called, it will look for a .typicalfolders folder as specified by [find-config](https://github.com/shannonmoeller/find-config).
+
 ## TODO
+
+ * Support YAML-config
+ * Variable interpolation in boilerplates
+ * Support symbolic links in  .typicalrc files
