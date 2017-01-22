@@ -1,29 +1,49 @@
 const findConfig = require('find-config')
+const userHome = require('user-home')
 const fs = require('fs')
 const path = require('path')
+const userHomeTypicalRc = path.resolve(userHome, '.typicalrc')
+const userHomeTypicalFolders = path.resolve(userHome, '.typicalfolders')
 
-function resolve () {
-  let nearestConfig = findConfig.read('.typicalrc')
-  if (!nearestConfig) {
+function loadConfigFile (filePath) {
+  if (!filePath || !fs.existsSync(filePath)) {
     return {}
   }
-  return JSON.parse(nearestConfig)
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'))
 }
 
-function resolveFolderConfig () {
-  // This should be a folder, so we don't read it, but rather traverse it.
-  let nearestConfig = findConfig('.typicalfolders')
-  if (!nearestConfig) {
+function loadFolderConfig (dirPath) {
+  if (!dirPath || !fs.existsSync(dirPath)) {
     return {}
   }
   let result = {}
-  fs.readdirSync(nearestConfig).forEach(file => {
-    const folderPath = path.resolve(nearestConfig, file)
+  fs.readdirSync(dirPath).forEach(file => {
+    const folderPath = path.resolve(dirPath, file)
     if (fs.statSync(folderPath).isDirectory()) {
       result[file] = {isDirectory: true, path: folderPath}
     }
   })
   return result
+}
+
+function resolve () {
+  let nearestConfig = findConfig('.typicalrc')
+  return Object.assign(
+    {},
+    loadConfigFile(userHomeTypicalRc),
+    loadConfigFile(nearestConfig)
+  )
+}
+
+function resolveFolderConfig () {
+  // This should be a folder, so we don't read it, but rather traverse it.
+  let nearestConfig = findConfig('.typicalfolders')
+
+  return Object.assign(
+    {},
+    loadFolderConfig(userHomeTypicalFolders),
+    loadFolderConfig(nearestConfig)
+  )
 }
 
 module.exports = {
