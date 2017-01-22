@@ -1,6 +1,6 @@
 {
-  "name": "typical",
-  "version": "0.1.0",
+  "name": "typical.js",
+  "version": "0.2.0",
   "description": "Bootstrap typical directory structures with a single command",
   "main": "index.js",
   "scripts": {

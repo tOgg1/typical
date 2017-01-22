@@ -1,6 +1,7 @@
 const fs = require('fs')
 const ncp = require('ncp').ncp
 const path = require('path')
+const cwd = process.cwd()
 
 function writeFile (path, content) {
   fs.writeFile(path, content, 'utf8', error => {
@@ -45,7 +46,7 @@ function writeFolderConfig (config, callback) {
     }
   }
   folderFiles.forEach(file => {
-    ncp(path.resolve(loadFromPath, file), process.cwd(), error => {
+    ncp(path.resolve(loadFromPath, file), path.resolve(cwd, file), error => {
       if (error) {
         throw error
       }
@@ -55,7 +56,7 @@ function writeFolderConfig (config, callback) {
 }
 
 function writeRegularConfig (config) {
-  return writeDirectory(process.cwd(), config)
+  return writeDirectory(cwd, config)
 }
 
 function write (config, callback) {
