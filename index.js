@@ -2,7 +2,6 @@
 let program = require('commander')
 let configResolver = require('./src/configResolver')
 let configWriter = require('./src/configWriter')
-let interpolationResolver = require('./src/interpolationResolver')
 
 let configElement = '_default'
 
@@ -28,8 +27,5 @@ if (!config[configElement]) {
   throw Error('Found no element ' + configElement + ' in config')
 }
 
-// Interpolate variables
 let resolvedElement = config[configElement]
-interpolationResolver.resolve(resolvedElement, function (result) {
-  configWriter.write(result)
-})
+configWriter.write(resolvedElement)

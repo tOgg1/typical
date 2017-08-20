@@ -27,24 +27,23 @@ function interpolateString (string, interpolations) {
   }, string)
 }
 
-function resolveRegularConfig (config, interpolations) {
+function interpolateRegularConfig (config, interpolations) {
   return Object.keys(config).reduce((acc, filename) => {
     const fileObject = config[filename]
     if (typeof fileObject === 'string') {
       acc[filename] = interpolateString(fileObject, interpolations)
     } else if (fileObject.constructor === Object) {
-      acc[filename] = resolveRegularConfig(fileObject, interpolations)
+      acc[filename] = interpolateRegularConfig(fileObject, interpolations)
     }
     return acc
   }, {})
 }
 
-function resolve (configElement, callback) {
-  let interpolations = configElement.__interpolations__
-  if (!interpolations || interpolations.constructor !== Array || interpolations.length === 0) {
-    return configElement
-  }
+function interpolationsAreValid (interpolations) {
+  return !!interpolations && interpolations.constructor === Array && interpolations.length !== 0
+}
 
+function promptForInterpolations (interpolations, callback) {
   prompt.get(interpolations, function (err, result) {
     if (err) {
       throw Error('Unable to get input from prompt. Failed with error: ' + err)
@@ -59,12 +58,26 @@ function resolve (configElement, callback) {
       return acc
     }, {})
 
-    callback(resolveRegularConfig(configElement, interpolations))
+    callback(interpolations)
+  })
+}
+
+function resolveRegularConfig (configElement, callback) {
+  let interpolations = configElement.__interpolations__
+  if (!interpolationsAreValid(interpolations)) {
+    callback(configElement)
+    return
+  }
+
+  promptForInterpolations(interpolations, function (userResolvedInterpolations) {
+    callback(interpolateRegularConfig(configElement, userResolvedInterpolations))
   })
 }
 
 module.exports = {
-  resolve: resolve,
+  resolveRegularConfig: resolveRegularConfig,
   interpolateString: interpolateString,
-  resolveRegularConfig: resolveRegularConfig
+  interpolateRegularConfig: interpolateRegularConfig,
+  interpolationsAreValid: interpolationsAreValid,
+  promptForInterpolations: promptForInterpolations
 }

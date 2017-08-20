@@ -41,7 +41,7 @@ describe('interpolationResolver', () => {
       expect(result).to.equal('Lets interpolate nothing')
     })
   })
-  describe('#resolveRegularCongfig', () => {
+  describe('#interpolateRegularConfig', () => {
     it('should interpolate all entries in a flat config', () => {
       const config = {
         file1: 'This content has some $${interpolated} content',
@@ -53,7 +53,7 @@ describe('interpolationResolver', () => {
         two: 'no',
         content: 'epicness'
       }
-      const result = interpolationResolver.resolveRegularConfig(config, interpolations)
+      const result = interpolationResolver.interpolateRegularConfig(config, interpolations)
       expect(result).to.deep.equal({
         file1: 'This content has some regular content',
         file2: 'This content does not',
@@ -70,7 +70,7 @@ describe('interpolationResolver', () => {
       const interpolations = {
         should: 'better'
       }
-      const result = interpolationResolver.resolveRegularConfig(config, interpolations)
+      const result = interpolationResolver.interpolateRegularConfig(config, interpolations)
       expect(result).to.deep.equal({
         file: 'This better not be ignored'
       })
