@@ -21,6 +21,11 @@ function loadFolderConfig (dirPath) {
     const folderPath = path.resolve(dirPath, file)
     if (fs.statSync(folderPath).isDirectory()) {
       result[file] = {isDirectory: true, path: folderPath}
+      // Read interpolations
+      const interpolationsPath = path.resolve(folderPath, '__interpolations__')
+      if (fs.existsSync(path.resolve(folderPath, '__interpolations__'))) {
+        result[file].__interpolations__ = loadConfigFile(interpolationsPath)
+      }
     }
   })
   return result

@@ -56,7 +56,7 @@ With this configuration, running `typical entry` yields
 └── file
 ```
 
-When typical is called, it will look for a .typicalrc folder as specified by [find-config](https://github.com/shannonmoeller/find-config).
+When typical is called, it will look for a .typicalrc folder as specified by [find-config](https://github.com/shannonmoeller/find-config). If a .typicalrc file exists at the home directory of the invocating user, this config file will be merged with the 'locally found' one. The locally found config will have precedence over the home directory config.
 
 ## .typicalfolders configuration
 
@@ -90,7 +90,7 @@ Now we can run `typical html5-boilerplate` at some empty directory to instantiat
 
 Note that this will also copy any "hidden" file, such as the .git directory, which you might want to delete.
 
-When typical is called, it will look for a .typicalfolders folder as specified by [find-config](https://github.com/shannonmoeller/find-config).
+When typical is called, it will look for a .typicalfolders folder as specified by [find-config](https://github.com/shannonmoeller/find-config). If a .typicalfolders directory exists at the home directory of the invocating user, the resulting config will be merged with the 'locally found' config. The locally found config will have precedence over the home directory config.
 
 ## TODO
 
