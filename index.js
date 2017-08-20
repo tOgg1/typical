@@ -2,6 +2,7 @@
 let program = require('commander')
 let configResolver = require('./src/configResolver')
 let configWriter = require('./src/configWriter')
+let interpolationResolver = require('./src/interpolationResolver')
 
 let configElement = '_default'
 
@@ -22,9 +23,13 @@ let config = Object.assign(
   configResolver.resolveFolderConfig()
 )
 
-// Lets go.
+// Does it exist?
 if (!config[configElement]) {
   throw Error('Found no element ' + configElement + ' in config')
 }
-configWriter.write(config[configElement])
 
+// Interpolate variables
+let resolvedElement = config[configElement]
+interpolationResolver.resolve(resolvedElement, function (result) {
+  configWriter.write(result)
+})

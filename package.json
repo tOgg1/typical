@@ -26,6 +26,7 @@
     "commander": "^2.9.0",
     "find-config": "^1.0.0",
     "ncp": "^2.0.0",
+    "prompt": "^1.0.0",
     "user-home": "^2.0.0"
   }
 }
