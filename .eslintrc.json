@@ -3,5 +3,9 @@
     "plugins": [
         "standard",
         "promise"
-    ]
+    ],
+    "rules": {
+    	"no-useless-escape": 0,
+    	"no-template-curly-in-string": 0
+    }
 }
