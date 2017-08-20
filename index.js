@@ -22,9 +22,10 @@ let config = Object.assign(
   configResolver.resolveFolderConfig()
 )
 
-// Lets go.
+// Does it exist?
 if (!config[configElement]) {
   throw Error('Found no element ' + configElement + ' in config')
 }
-configWriter.write(config[configElement])
 
+let resolvedElement = config[configElement]
+configWriter.write(resolvedElement)
