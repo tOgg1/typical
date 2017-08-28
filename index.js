@@ -2,6 +2,7 @@
 let program = require('commander')
 let configResolver = require('./src/configResolver')
 let configWriter = require('./src/configWriter')
+let interpolationResolver = require('./src/interpolationResolver')
 
 let configElement = '_default'
 
@@ -13,6 +14,7 @@ program
   .action(_configElement => {
     configElement = _configElement
   })
+  .option('-s, --scan', 'Automatically detect interpolatinos from content')
   .parse(process.argv)
 
 // Merge regular config file and folder config
@@ -28,4 +30,13 @@ if (!config[configElement]) {
 }
 
 let resolvedElement = config[configElement]
-configWriter.write(resolvedElement)
+
+if (program.scan) {
+  interpolationResolver.scan(resolvedElement, (result) => {
+    resolvedElement.__interpolations__ = (resolvedElement.__interpolations__ || []).concat(result)
+    configWriter.write(resolvedElement)
+  })
+} else {
+  configWriter.write(resolvedElement)
+}
+

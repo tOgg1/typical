@@ -1,6 +1,10 @@
 const util = require('./util')
 const escapeRegExp = util.escapeRegExp
+const interpolationRegex = util.interpolationRegex
 const prompt = require('prompt')
+const fs = require('fs')
+const readline = require('readline')
+const readdirp = require('readdirp')
 
 prompt.message = ''
 prompt.delimiter = ''
@@ -74,10 +78,56 @@ function resolveRegularConfig (configElement, callback) {
   })
 }
 
+function scanRegularConfig (configElement, callback) {
+  const result = Object.keys(configElement).reduce((acc, filename) => {
+    const fileObject = configElement[filename]
+    if (typeof fileObject === 'string') {
+      let match
+      while ((match = interpolationRegex.exec(fileObject))) {
+        acc.push(match[1])
+      }
+    } else {
+      acc = acc.concat(scanRegularConfig(fileObject))
+    }
+    return acc
+  }, [])
+  if (callback) {
+    callback(result)
+  }
+  return result
+}
+
+function scanDirectoryConfig (configElement, callback) {
+  const results = []
+  const stream = readdirp({root: configElement.path})
+  stream
+    .on('data', entry => {
+      const fileContents = fs.readFileSync(entry.fullPath, 'utf8')
+      let match
+      while ((match = interpolationRegex.exec(fileContents))) {
+        results.push(match[1])
+      }
+    })
+    .on('end', () => {
+      callback(results)
+    })
+}
+
+function scan (configElement, callback) {
+  if (configElement.isDirectory) {
+    return scanDirectoryConfig(configElement, callback)
+  } else {
+    return scanRegularConfig(configElement, callback)
+  }
+}
+
 module.exports = {
-  resolveRegularConfig: resolveRegularConfig,
   interpolateString: interpolateString,
   interpolateRegularConfig: interpolateRegularConfig,
   interpolationsAreValid: interpolationsAreValid,
-  promptForInterpolations: promptForInterpolations
+  promptForInterpolations: promptForInterpolations,
+  resolveRegularConfig: resolveRegularConfig,
+  scanRegularConfig: scanRegularConfig,
+  scanDirectoryConfig: scanDirectoryConfig,
+  scan: scan
 }

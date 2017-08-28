@@ -8,7 +8,10 @@ function escapeRegExp (str) {
   return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&')
 }
 
+const interpolationRegex = /\$\$\{([\w0-9]+)\}/g
+
 module.exports = {
   escapeRegExp: escapeRegExp,
-  ignoredPatterns: ignoredPatterns
+  ignoredPatterns: ignoredPatterns,
+  interpolationRegex: interpolationRegex
 }
