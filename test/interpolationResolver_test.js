@@ -1,6 +1,7 @@
-/* global describe, it */
-let expect = require('chai').expect
-let interpolationResolver = require('../src/interpolationResolver')
+/* global describe, it, before, after */
+const expect = require('chai').expect
+const mockfs = require('mock-fs')
+const interpolationResolver = require('../src/interpolationResolver')
 
 describe('interpolationResolver', () => {
   describe('#interpolateString', () => {
@@ -74,6 +75,38 @@ describe('interpolationResolver', () => {
       expect(result).to.deep.equal({
         file: 'This better not be ignored'
       })
+    })
+  })
+  describe('#scanRegularConfig', () => {
+    it('should scan a simple element', () => {
+      const config = {
+        file: '$${This} should be parsed',
+        file2: 'Nothing to see here'
+      }
+      expect(interpolationResolver.scanRegularConfig(config)).to.deep.equal([
+        'This'
+      ])
+    })
+    it('should scan multiple entries on one line', () => {
+      const config = {
+        file: '$${This} should be $${parsed}'
+      }
+      expect(interpolationResolver.scanRegularConfig(config)).to.deep.equal([
+        'This', 'parsed'
+      ])
+    })
+    it('should handle nested elements', () => {
+      const config = {
+        dir: {
+          file: '$${This} should be parsed',
+          dir2: {
+            file2: 'So $${should}\n\n\t$${this}'
+          }
+        }
+      }
+      expect(interpolationResolver.scanRegularConfig(config)).to.deep.equal([
+        'This', 'should', 'this'
+      ])
     })
   })
 })
