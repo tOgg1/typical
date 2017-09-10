@@ -26,7 +26,8 @@ let config = Object.assign(
 
 // Does it exist?
 if (!config[configElement]) {
-  throw Error('Found no element ' + configElement + ' in config')
+  console.error('Found no recipe named \'' + configElement + '\' in resolved config')
+  process.exit(1)
 }
 
 let resolvedElement = config[configElement]
