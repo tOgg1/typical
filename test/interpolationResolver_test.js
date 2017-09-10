@@ -109,4 +109,25 @@ describe('interpolationResolver', () => {
       ])
     })
   })
+  describe('#scanDirectoryConfig', () => {
+    before(() => {
+      mockfs({
+        '.typicalfolders': {
+          path1: {
+            file1: '$${This} should be parsed',
+            file2: 'Nothing to see here'
+          }
+        }
+      })
+    })
+    after(() => {
+      mockfs.restore()
+    })
+    it('should scan a simple element', done => {
+      interpolationResolver.scanDirectoryConfig({path: '.typicalfolders/path1'}, result => {
+        expect(result).to.deep.equal(['This'])
+        done()
+      })
+    })
+  })
 })
