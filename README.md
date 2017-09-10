@@ -127,9 +127,9 @@ Now you might want to be prompted for the name of the project, and perhaps the d
 }
 ```
 
-For typical to then prompt you for input, you will have to create an entry in the config named __interpolations__, which contains a list of names to prompt the input for.
+For typical to then prompt you for input, you will have to create an entry in the config named `__interpolations__`, which contains a list of names to prompt the input for.
 
-If we are using a .typicalrc file, we would simple add an __interpolations__ entry in the json structure. If we are using a .typicalfolders config, we would write a new __interpolations__ file containing the json array. For instance:
+If we are using a .typicalrc file, we would simple add an `__interpolations__` entry in the json structure. If we are using a .typicalfolders config, we would write a new `__interpolations__` file containing the json array. For instance:
 
 ```
 [
@@ -138,7 +138,7 @@ If we are using a .typicalrc file, we would simple add an __interpolations__ ent
 ]
 ```
 
-Typical uses [prompt](https://github.com/flatiron/prompt) for prompting for user input. The __interpolations__ entry may contain any type of more complex prompt config, for example:
+Typical uses [prompt](https://github.com/flatiron/prompt) for prompting for user input. The `__interpolations__` entry may contain any type of more complex prompt config, for example:
 
 ```
 [
@@ -156,7 +156,7 @@ Typical uses [prompt](https://github.com/flatiron/prompt) for prompting for user
 
 ### Detection of variables
 
-By default, only the variables defined in the __interpolations__ array will be prompted for, and then interpolated. However, if the command is run with the `--scan` flag, all files will be scanned for possible interpolations (i.e. parts of the file matching our interpolation format).
+By default, only the variables defined in the `__interpolations__` array will be prompted for, and then interpolated. However, if the command is run with the `--scan` flag, all files will be scanned for possible interpolations (i.e. parts of the file matching our interpolation format).
 
 ## TODO
 
