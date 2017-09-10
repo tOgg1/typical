@@ -99,18 +99,19 @@ function scanRegularConfig (configElement, callback) {
 
 function scanDirectoryConfig (configElement, callback) {
   const results = []
-  const stream = readdirp({root: configElement.path})
-  stream
-    .on('data', entry => {
+  readdirp({root: configElement.path},
+    entry => {
       const fileContents = fs.readFileSync(entry.fullPath, 'utf8')
       let match
       while ((match = interpolationRegex.exec(fileContents))) {
         results.push(match[1])
       }
-    })
-    .on('end', () => {
+    },
+    err => {
+      if (err) throw err
       callback(results)
-    })
+    }
+  )
 }
 
 function scan (configElement, callback) {
