@@ -26,11 +26,13 @@ function writeFolderConfig (config, callback) {
     readdirp({root: config.path, entryType: 'all'},
       entry => {
         if (entry.stat.isDirectory()) {
-          fs.mkdirSync(
-            path.join(
+          const directoryPath = path.join(
               cwd,
-              interpolationResolver.interpolateString(entry.path, userResolvedInterpolations))
+            interpolationResolver.interpolateString(entry.path, userResolvedInterpolations)
           )
+          if (!fs.existsSync(directoryPath)) {
+            fs.mkdirSync(directoryPath)
+          }
         } else {
           const fileContents = fs.readFileSync(entry.fullPath, 'utf8')
           writeFile(
