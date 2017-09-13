@@ -116,7 +116,16 @@ describe('interpolationResolver', () => {
           path1: {
             file1: '$${This} should be parsed',
             file2: 'Nothing to see here'
+          },
+          path2: {
+            file: '$${This} should be $${parsed}'
+          },
+          path3: {
+            file: '$${This} should be parsed',
+            dir2: {
+              file2: 'So $${should}\n\n\t$${this}'
           }
+        }
         }
       })
     })
@@ -126,6 +135,18 @@ describe('interpolationResolver', () => {
     it('should scan a simple element', done => {
       interpolationResolver.scanDirectoryConfig({path: '.typicalfolders/path1'}, result => {
         expect(result).to.deep.equal(['This'])
+        done()
+      })
+    })
+    it('should scan multiple entries on one line', (done) => {
+      interpolationResolver.scanDirectoryConfig({path: '.typicalfolders/path2'}, result => {
+        expect(result).to.deep.equal(['This', 'parsed'])
+        done()
+      })
+    })
+    it('should handle nested elements', (done) => {
+      interpolationResolver.scanDirectoryConfig({path: '.typicalfolders/path3'}, result => {
+        expect(result).to.deep.equal(['This', 'should', 'this'])
         done()
       })
     })
