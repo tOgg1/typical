@@ -3,7 +3,6 @@ const escapeRegExp = util.escapeRegExp
 const interpolationRegex = util.interpolationRegex
 const prompt = require('prompt')
 const fs = require('fs')
-const readline = require('readline')
 const readdirp = require('readdirp')
 
 prompt.message = ''
@@ -48,6 +47,11 @@ function interpolationsAreValid (interpolations) {
 }
 
 function promptForInterpolations (interpolations, callback) {
+  if (!interpolations || !interpolationsAreValid(interpolations)) {
+    callback({})
+    return
+  }
+
   prompt.get(interpolations, function (err, result) {
     if (err) {
       throw Error('Unable to get input from prompt. Failed with error: ' + err)
