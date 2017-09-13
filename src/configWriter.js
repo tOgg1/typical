@@ -1,16 +1,11 @@
 const fs = require('fs')
-const readline = require('readline')
-const ncp = require('ncp').ncp
 const path = require('path')
 const cwd = process.cwd()
 const interpolationResolver = require('./interpolationResolver')
+const readdirp = require('readdirp')
 
 function writeFile (path, content) {
-  fs.writeFile(path, content, 'utf8', error => {
-    if (error) {
-      throw error
-    }
-  })
+  fs.writeFileSync(path, content, 'utf8')
 }
 
 function writeDirectory (parentDirectory, directoryObject) {
@@ -27,41 +22,31 @@ function writeDirectory (parentDirectory, directoryObject) {
 }
 
 function writeFolderConfig (config, callback) {
-  const loadFromPath = config.path
-  const options = {
-
-  }
-
-  const startWriting = () => {
-    ncp(loadFromPath, cwd, options, error => {
-      if (error) {
-        throw error
-      }
-      if (callback) {
+  interpolationResolver.promptForInterpolations(config.__interpolations__, function (userResolvedInterpolations) {
+    readdirp({root: config.path, entryType: 'all'},
+      entry => {
+        if (entry.stat.isDirectory()) {
+          fs.mkdirSync(
+            path.join(
+              cwd,
+              interpolationResolver.interpolateString(entry.path, userResolvedInterpolations))
+          )
+        } else {
+          const fileContents = fs.readFileSync(entry.fullPath, 'utf8')
+          writeFile(
+            path.join(cwd, entry.path),
+            interpolationResolver.interpolateString(fileContents, userResolvedInterpolations)
+          )
+        }
+      },
+      err => {
+        if (err) {
+          throw err
+        }
         callback()
       }
-    })
-  }
-
-  // If we've got interpolations, we create a transform function
-  // utilizing readline to read every file line by line and transforming any line
-  // matching an interpolation
-  if (interpolationResolver.interpolationsAreValid(config.__interpolations__)) {
-    interpolationResolver.promptForInterpolations(config.__interpolations__, function (userResolvedInterpolations) {
-      options.transform = (read, write) => {
-        const rl = readline.createInterface({
-          input: read
-        })
-
-        rl.on('line', (input) => {
-          write.write(interpolationResolver.interpolateString(input, userResolvedInterpolations) + '\n')
-        })
-      }
-      startWriting()
-    })
-  } else {
-    startWriting()
-  }
+    )
+  })
 }
 
 function writeRegularConfig (config, callback) {
@@ -78,7 +63,7 @@ function write (config, callback) {
   if (config.isDirectory) {
     writeFolderConfig(config, callback)
   } else {
-    writeRegularConfig(config)
+    writeRegularConfig(config, callback)
   }
 }
 
