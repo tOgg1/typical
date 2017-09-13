@@ -3,6 +3,7 @@ const path = require('path')
 const cwd = process.cwd()
 const interpolationResolver = require('./interpolationResolver')
 const readdirp = require('readdirp')
+const { containsIgnoredPattern } = require('./util')
 
 function writeFile (path, content) {
   fs.writeFileSync(path, content, 'utf8')
@@ -10,6 +11,10 @@ function writeFile (path, content) {
 
 function writeDirectory (parentDirectory, directoryObject) {
   Object.keys(directoryObject).forEach(fileName => {
+    if (containsIgnoredPattern(fileName)) {
+      return
+    }
+
     const fileObject = directoryObject[fileName]
     if (typeof fileObject === 'string') {
       writeFile(path.resolve(parentDirectory, fileName), fileObject)
@@ -25,9 +30,15 @@ function writeFolderConfig (config, callback) {
   interpolationResolver.promptForInterpolations(config.__interpolations__, function (userResolvedInterpolations) {
     readdirp({root: config.path, entryType: 'all'},
       entry => {
+        // Avoid using fullPath here, as a users folder structure apart from
+        // what's inside the config is not our concern
+        if (containsIgnoredPattern(entry.path)) {
+          return
+        }
+
         if (entry.stat.isDirectory()) {
           const directoryPath = path.join(
-              cwd,
+            cwd,
             interpolationResolver.interpolateString(entry.path, userResolvedInterpolations)
           )
           if (!fs.existsSync(directoryPath)) {
