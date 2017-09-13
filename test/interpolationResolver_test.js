@@ -81,6 +81,74 @@ describe('interpolationResolver', () => {
         file: 'This better not be ignored'
       })
     })
+    it('should interpolate a file name', () => {
+      const config = {
+        '$${moduleName}': 'contents'
+      }
+      const interpolations = {
+        moduleName: 'typical'
+      }
+      const result = interpolationResolver.interpolateRegularConfig(config, interpolations)
+      expect(result).to.deep.equal({
+        typical: 'contents'
+      })
+    })
+    it('should interpolate a folder name', () => {
+      const config = {
+        '$${moduleName}': {
+          file1: 'contents'
+        }
+      }
+      const interpolations = {
+        moduleName: 'typical'
+      }
+      const result = interpolationResolver.interpolateRegularConfig(config, interpolations)
+      expect(result).to.deep.equal({
+        typical: {
+          file1: 'contents'
+        }
+      })
+    })
+    it('should interpolate multiple entries in a name', () => {
+      const config = {
+        '$${moduleName}_$${subName}': {
+          file1: 'contents'
+        }
+      }
+      const interpolations = {
+        moduleName: 'typical',
+        subName: 'testing'
+      }
+      const result = interpolationResolver.interpolateRegularConfig(config, interpolations)
+      expect(result).to.deep.equal({
+        typical_testing: {
+          file1: 'contents'
+        }
+      })
+    })
+    it('should interpolate nested folders and files with content', () => {
+      const config = {
+        '$${moduleName}': {
+          '$${subName}': {
+            '$${fileName}': '$${contents}'
+          }
+        }
+      }
+      const interpolations = {
+        moduleName: 'typical',
+        subName: 'tests',
+        fileName: 'meta_test.js',
+        contents: 'throw 0'
+      }
+      const result = interpolationResolver.interpolateRegularConfig(config, interpolations)
+      expect(result).to.deep.equal({
+        typical: {
+          tests: {
+            'meta_test.js': 'throw 0'
+          }
+        }
+      })
+    })
   })
   describe('#scanRegularConfig', () => {
     it('should scan a simple element', () => {
@@ -113,6 +181,14 @@ describe('interpolationResolver', () => {
         'This', 'should', 'this'
       ])
     })
+    it('should discover a filename element', () => {
+      const config = {
+        '$${Hello}': 'Lets see if we can find the filename'
+      }
+      expect(interpolationResolver.scanRegularConfig(config)).to.deep.equal([
+        'Hello'
+      ])
+    })
   })
   describe('#scanDirectoryConfig', () => {
     before(() => {
@@ -130,6 +206,9 @@ describe('interpolationResolver', () => {
             dir2: {
               file2: 'So $${should}\n\n\t$${this}'
             }
+          },
+          path4: {
+            '$${Hello}': 'Lets see if we can find the filename'
           }
         }
       })
@@ -152,6 +231,12 @@ describe('interpolationResolver', () => {
     it('should handle nested elements', (done) => {
       interpolationResolver.scanDirectoryConfig({path: '.typicalfolders/path3'}, result => {
         expect(result).to.deep.equal(['This', 'should', 'this'])
+        done()
+      })
+    })
+    it('should discover a filename element', (done) => {
+      interpolationResolver.scanDirectoryConfig({path: '.typicalfolders/path4'}, result => {
+        expect(result).to.deep.equal(['Hello'])
         done()
       })
     })

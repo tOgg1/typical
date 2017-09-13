@@ -25,6 +25,26 @@ describe('configWriter', () => {
               }
             }
           }
+        },
+        path3: {
+          '$${moduleName}': 'contents'
+        },
+        path4: {
+          '$${moduleName}': {
+            file1: 'contents'
+          }
+        },
+        path5: {
+          '$${moduleName}_$${subName}': {
+            file1: 'contents'
+          }
+        },
+        path6: {
+          '$${moduleName}': {
+            '$${subName}': {
+              '$${fileName}': '$${contents}'
+            }
+          }
         }
       }
     })

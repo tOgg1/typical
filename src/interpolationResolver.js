@@ -33,10 +33,11 @@ function interpolateString (string, interpolations) {
 function interpolateRegularConfig (config, interpolations) {
   return Object.keys(config).reduce((acc, filename) => {
     const fileObject = config[filename]
+    const newFileName = interpolateString(filename, interpolations)
     if (typeof fileObject === 'string') {
-      acc[filename] = interpolateString(fileObject, interpolations)
+      acc[newFileName] = interpolateString(fileObject, interpolations)
     } else if (fileObject.constructor === Object) {
-      acc[filename] = interpolateRegularConfig(fileObject, interpolations)
+      acc[newFileName] = interpolateRegularConfig(fileObject, interpolations)
     }
     return acc
   }, {})
@@ -84,9 +85,14 @@ function resolveRegularConfig (configElement, callback) {
 
 function scanRegularConfig (configElement, callback) {
   const result = Object.keys(configElement).reduce((acc, filename) => {
+    // Get any interpolations in filename
+    let match
+    while ((match = interpolationRegex.exec(filename))) {
+      acc.push(match[1])
+    }
+
     const fileObject = configElement[filename]
     if (typeof fileObject === 'string') {
-      let match
       while ((match = interpolationRegex.exec(fileObject))) {
         acc.push(match[1])
       }
@@ -103,10 +109,18 @@ function scanRegularConfig (configElement, callback) {
 
 function scanDirectoryConfig (configElement, callback) {
   const results = []
-  readdirp({root: configElement.path},
+  readdirp({root: configElement.path, entryType: 'all'},
     entry => {
-      const fileContents = fs.readFileSync(entry.fullPath, 'utf8')
+      // Get any interpolations in filename
       let match
+      while ((match = interpolationRegex.exec(entry.path))) {
+        results.push(match[1])
+      }
+
+      if (entry.stat.isDirectory()) {
+        return
+      }
+      const fileContents = fs.readFileSync(entry.fullPath, 'utf8')
       while ((match = interpolationRegex.exec(fileContents))) {
         results.push(match[1])
       }
