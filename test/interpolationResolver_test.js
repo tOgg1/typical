@@ -41,6 +41,11 @@ describe('interpolationResolver', () => {
       const result = interpolationResolver.interpolateString(string, interpolations)
       expect(result).to.equal('Lets interpolate nothing')
     })
+    it('should return the string on no interpolations', () => {
+      const string = 'Just return this'
+      const newString = interpolationResolver.interpolateString(string, [])
+      expect(newString).to.equal(string)
+    })
   })
   describe('#interpolateRegularConfig', () => {
     it('should interpolate all entries in a flat config', () => {
@@ -124,8 +129,8 @@ describe('interpolationResolver', () => {
             file: '$${This} should be parsed',
             dir2: {
               file2: 'So $${should}\n\n\t$${this}'
+            }
           }
-        }
         }
       })
     })
