@@ -46,8 +46,12 @@ function writeFolderConfig (config, callback) {
           }
         } else {
           const fileContents = fs.readFileSync(entry.fullPath, 'utf8')
+          const interpolatedPath = path.join(
+            cwd,
+            interpolationResolver.interpolateString(entry.path, userResolvedInterpolations)
+          )
           writeFile(
-            path.join(cwd, entry.path),
+            interpolatedPath,
             interpolationResolver.interpolateString(fileContents, userResolvedInterpolations)
           )
         }
@@ -56,7 +60,9 @@ function writeFolderConfig (config, callback) {
         if (err) {
           throw err
         }
-        callback()
+        if (callback) {
+          callback()
+        }
       }
     )
   })
