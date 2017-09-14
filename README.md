@@ -154,6 +154,18 @@ Typical uses [prompt](https://github.com/flatiron/prompt) for prompting for user
 ]
 ```
 
+Typical will also interpolate file names an folder names. Thus a configuration as follows:
+
+```
+.
+├── __interpolations__
+├── $${myDir}
+│   └── index.js
+└── $${myFile}
+```
+
+Will with giving interpolations of `$${myDir}` and `$${myFile}` give the expected results.
+
 ### Detection of variables
 
 By default, only the variables defined in the `__interpolations__` array will be prompted for, and then interpolated. However, if the command is run with the `--scan` flag, all files will be scanned for possible interpolations (i.e. parts of the file matching our interpolation format).
@@ -161,5 +173,4 @@ By default, only the variables defined in the `__interpolations__` array will be
 ## TODO
 
  * Support YAML-config
- * Interpolation of file names
  * Support symbolic links in  .typicalrc files
