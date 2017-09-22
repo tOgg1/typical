@@ -93,7 +93,7 @@ describe('configWriter', () => {
     const config = {
       path1: {
         path: '.typicalfolders/path1',
-        isDirectory: true
+        __isDirectory__: true
       }
     }
     configWriter.write(config.path1, () => {
@@ -121,7 +121,7 @@ describe('configWriter', () => {
     const config = {
       path2: {
         path: '.typicalfolders/path2',
-        isDirectory: true
+        __isDirectory__: true
       }
     }
     configWriter.write(config.path2, () => {

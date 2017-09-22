@@ -79,7 +79,7 @@ function writeRegularConfig (config, callback) {
 }
 
 function write (config, callback) {
-  if (config.isDirectory) {
+  if (config.__isDirectory__) {
     writeFolderConfig(config, callback)
   } else {
     writeRegularConfig(config, callback)

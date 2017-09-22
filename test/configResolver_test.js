@@ -35,9 +35,9 @@ describe('configResolver', () => {
     })
     let config = resolveFolderConfig()
     expect(config).to.contain.all.keys('folder1', 'folder2')
-    expect(config.folder1).to.contain.all.keys('isDirectory', 'path')
+    expect(config.folder1).to.contain.all.keys('__isDirectory__', 'path')
     expect(config.folder1.path).to.contain('.typicalfolders/folder1')
-    expect(config.folder2).to.contain.all.keys('isDirectory', 'path')
+    expect(config.folder2).to.contain.all.keys('__isDirectory__', 'path')
   })
   it('should merge a simple config with a simple folderconfig', () => {
     mockfs({
@@ -59,7 +59,7 @@ describe('configResolver', () => {
       resolveFolderConfig()
     )
     expect(config).to.have.all.keys('config1', 'config2')
-    expect(config.config1).to.have.all.keys('isDirectory', 'path')
-    expect(config.config2).to.have.all.keys('isDirectory', 'path')
+    expect(config.config1).to.have.all.keys('__isDirectory__', 'path')
+    expect(config.config2).to.have.all.keys('__isDirectory__', 'path')
   })
 })
