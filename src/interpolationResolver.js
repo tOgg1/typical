@@ -133,7 +133,7 @@ function scanDirectoryConfig (configElement, callback) {
 }
 
 function scan (configElement, callback) {
-  if (configElement.isDirectory) {
+  if (configElement.__isDirectory__) {
     return scanDirectoryConfig(configElement, callback)
   } else {
     return scanRegularConfig(configElement, callback)

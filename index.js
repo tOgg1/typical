@@ -1,8 +1,9 @@
 #! /usr/bin/env node
-let program = require('commander')
-let configResolver = require('./src/configResolver')
-let configWriter = require('./src/configWriter')
-let interpolationResolver = require('./src/interpolationResolver')
+const program = require('commander')
+const colors = require('colors')
+const configResolver = require('./src/configResolver')
+const configWriter = require('./src/configWriter')
+const interpolationResolver = require('./src/interpolationResolver')
 
 let configElement = '_default'
 
@@ -15,6 +16,8 @@ program
     configElement = _configElement
   })
   .option('-s, --scan', 'Automatically detect interpolatinos from content')
+  .option('-l, --list', 'List available typical recipes recipes')
+  .option('-p, --print', 'Print the config selected config element to stdout')
   .parse(process.argv)
 
 // Merge regular config file and folder config
@@ -24,13 +27,29 @@ let config = Object.assign(
   configResolver.resolveFolderConfig()
 )
 
+// If list is true, we simply list the available recipes
+if (program.list) {
+  console.log(colors.green('Available typical recipes:'))
+  Object.keys(config).forEach(element => {
+    console.log(colors.gray(' + ' + element.toString()))
+  })
+  process.exit(0)
+}
+
 // Does it exist?
 if (!config[configElement]) {
-  console.error('Found no recipe named \'' + configElement + '\' in resolved config')
+  console.error(colors.red('Found no recipe named \'' + configElement + '\' in resolved config'))
   process.exit(1)
 }
 
 let resolvedElement = config[configElement]
+
+// If print is true, we simply print the recipe, and exit
+if (program.print) {
+  console.log(colors.green('Typical recipe ') + '"' + colors.cyan(configElement) + '"')
+  console.log(colors.gray(JSON.stringify(resolvedElement, null, 2)))
+  process.exit(0)
+}
 
 if (program.scan) {
   interpolationResolver.scan(resolvedElement, (result) => {
