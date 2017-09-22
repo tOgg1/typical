@@ -23,6 +23,7 @@
     "mock-fs": "^4.4.1"
   },
   "dependencies": {
+    "colors": "^1.1.2",
     "commander": "^2.9.0",
     "find-config": "^1.0.0",
     "prompt": "^1.0.0",
