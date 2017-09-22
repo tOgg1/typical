@@ -4,8 +4,14 @@ const colors = require('colors')
 const configResolver = require('./src/configResolver')
 const configWriter = require('./src/configWriter')
 const interpolationResolver = require('./src/interpolationResolver')
+const hooks = require('./src/hooks')
 
 let configElement = '_default'
+
+function handleHook (element, acc) {
+  acc.push(element)
+  return acc
+}
 
 // Set up and parse program arguments.
 // We only really care about the first positional argument
@@ -19,6 +25,11 @@ program
   .option('-l, --list', 'List available typical recipes recipes')
   .option('-p, --print', 'Print the config selected config element to stdout')
   .option(
+    '-h, --hook <input>',
+    'One or more files with hooks.',
+    handleHook,
+    []
+  )
   .option(
     '-d, --disable-interpolation',
     'Disables all handling of interpolation. ' +
@@ -31,6 +42,11 @@ let config = Object.assign(
   configResolver.resolve(),
   configResolver.resolveFolderConfig()
 )
+
+// We have hooks to initialize
+if (program.hook) {
+  hooks.initialize(program.hook)
+}
 
 // If list is true, we simply list the available recipes
 if (program.list) {

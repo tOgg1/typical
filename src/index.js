@@ -1,6 +1,9 @@
+const hooks = require('./hooks')
 
-module.export = {
+module.exports = {
   configResolver: require('./configResolver'),
   configWriter: require('./configWriter'),
-  interpolationResolver: require('./interpolationResolver')
+  interpolationResolver: require('./interpolationResolver'),
+  hooks: hooks,
+  hook: hooks.hook
 }
