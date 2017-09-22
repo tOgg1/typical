@@ -1,8 +1,9 @@
 #! /usr/bin/env node
-let program = require('commander')
-let configResolver = require('./src/configResolver')
-let configWriter = require('./src/configWriter')
-let interpolationResolver = require('./src/interpolationResolver')
+const program = require('commander')
+const colors = require('colors')
+const configResolver = require('./src/configResolver')
+const configWriter = require('./src/configWriter')
+const interpolationResolver = require('./src/interpolationResolver')
 
 let configElement = '_default'
 
@@ -15,6 +16,7 @@ program
     configElement = _configElement
   })
   .option('-s, --scan', 'Automatically detect interpolatinos from content')
+  .option('-l, --list', 'List available typical recipes recipes')
   .parse(process.argv)
 
 // Merge regular config file and folder config
@@ -23,6 +25,15 @@ let config = Object.assign(
   configResolver.resolve(),
   configResolver.resolveFolderConfig()
 )
+
+// If list is true, we simply list the available recipes
+if (program.list) {
+  console.log(colors.green('Available typical recipes:'))
+  Object.keys(config).forEach(element => {
+    console.log(colors.gray(' + ' + element.toString()))
+  })
+  process.exit(1)
+}
 
 // Does it exist?
 if (!config[configElement]) {
