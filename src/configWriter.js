@@ -27,7 +27,11 @@ function writeDirectory (parentDirectory, directoryObject) {
 }
 
 function writeFolderConfig (config, callback) {
-  interpolationResolver.promptForInterpolations(config.__interpolations__, function (userResolvedInterpolations) {
+  let promptFunction = interpolationResolver.promptForInterpolations
+  if (config.__disableInterpolations__) {
+    promptFunction = (_, callback) => callback({})
+  }
+  promptFunction(config.__interpolations__, function (userResolvedInterpolations) {
     readdirp({root: config.path, entryType: 'all'},
       entry => {
         // Avoid using fullPath here, as a users folder structure apart from
@@ -69,8 +73,12 @@ function writeFolderConfig (config, callback) {
 }
 
 function writeRegularConfig (config, callback) {
+  let promptFunction = interpolationResolver.resolveRegularConfig
+  if (config.__disableInterpolations__) {
+    promptFunction = (_, callback) => callback(config)
+  }
   // Simply resolve all interpolations right away
-  interpolationResolver.resolveRegularConfig(config, function (interpolatedConfig) {
+  promptFunction(config, function (interpolatedConfig) {
     writeDirectory(cwd, interpolatedConfig)
     if (callback) {
       callback()

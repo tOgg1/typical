@@ -18,6 +18,11 @@ program
   .option('-s, --scan', 'Automatically detect interpolatinos from content')
   .option('-l, --list', 'List available typical recipes recipes')
   .option('-p, --print', 'Print the config selected config element to stdout')
+  .option(
+  .option(
+    '-d, --disable-interpolation',
+    'Disables all handling of interpolation. ' +
+    'If -s/--scan is enabled simultaneously, it will be ignored')
   .parse(process.argv)
 
 // Merge regular config file and folder config
@@ -44,6 +49,10 @@ if (!config[configElement]) {
 
 let resolvedElement = config[configElement]
 
+if (program.disableInterpolation) {
+  resolvedElement.__disableInterpolations__ = true
+}
+
 // If print is true, we simply print the recipe, and exit
 if (program.print) {
   console.log(colors.green('Typical recipe ') + '"' + colors.cyan(configElement) + '"')
@@ -51,7 +60,7 @@ if (program.print) {
   process.exit(0)
 }
 
-if (program.scan) {
+if (!program.disableInterpolation && program.scan) {
   interpolationResolver.scan(resolvedElement, (result) => {
     resolvedElement.__interpolations__ = (resolvedElement.__interpolations__ || []).concat(result)
     configWriter.write(resolvedElement)
