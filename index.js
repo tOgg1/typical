@@ -17,6 +17,7 @@ program
   })
   .option('-s, --scan', 'Automatically detect interpolatinos from content')
   .option('-l, --list', 'List available typical recipes recipes')
+  .option('-p, --print', 'Print the config selected config element to stdout')
   .parse(process.argv)
 
 // Merge regular config file and folder config
@@ -32,16 +33,23 @@ if (program.list) {
   Object.keys(config).forEach(element => {
     console.log(colors.gray(' + ' + element.toString()))
   })
-  process.exit(1)
+  process.exit(0)
 }
 
 // Does it exist?
 if (!config[configElement]) {
-  console.error('Found no recipe named \'' + configElement + '\' in resolved config')
+  console.error(colors.red('Found no recipe named \'' + configElement + '\' in resolved config'))
   process.exit(1)
 }
 
 let resolvedElement = config[configElement]
+
+// If print is true, we simply print the recipe, and exit
+if (program.print) {
+  console.log(colors.green('Typical recipe ') + '"' + colors.cyan(configElement) + '"')
+  console.log(colors.gray(JSON.stringify(resolvedElement, null, 2)))
+  process.exit(0)
+}
 
 if (program.scan) {
   interpolationResolver.scan(resolvedElement, (result) => {
