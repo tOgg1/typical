@@ -2,7 +2,10 @@ const ignoredPatterns = [
   /__meta__/,
   /__interpolations__/,
   /__hooks__/,
-  /__isDirectory__/
+  /__isDirectory__/,
+  /__cwd__/,
+  /__resolvedInterpolations__/,
+  /__disableInterpolations__/
 ]
 
 function containsIgnoredPattern (string) {

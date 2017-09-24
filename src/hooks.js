@@ -2,11 +2,11 @@ const cwd = process.cwd()
 const path = require('path')
 
 const types = {
-  beforeAll: 'before',
+  beforeAll: 'beforeAll',
   configLoaded: 'configLoaded',
   recipeFound: 'recipeFound',
   beforeFileWrite: 'beforeFileWrite',
-  fileEmitLine: 'fileEmitLine',
+  fileEmitContents: 'fileEmitContents',
   afterFileWrite: 'afterFileWrite',
   beforeDirectoryWrite: 'beforeDirectoryWrite',
   afterDirectoryWrite: 'afterDirectoryWrite',
@@ -18,20 +18,26 @@ const listeners = {
   configLoaded: [],
   recipeFound: [],
   beforeFileWrite: [],
-  fileEmitLine: [],
+  fileEmitContents: [],
   afterFileWrite: [],
   beforeDirectoryWrite: [],
   afterDirectoryWrite: [],
   afterAll: []
 }
 
-function emit (hook) {
+function emit (hook, data) {
   if (!(hook in types)) {
     throw Error('Fatal error: Hook ' + hook.toString() + ' does not exist')
   }
 
   const hookListeners = listeners[hook] || []
-  hookListeners.forEach(hookListener => hookListener(arguments.slice(1)))
+  return hookListeners.reduce((nextHook, acc) => {
+    const nextData = nextHook(acc, data)
+    if (nextData === undefined) {
+      return acc
+    }
+    return nextData
+  }, data)
 }
 
 function initialize (hookFiles) {
@@ -47,6 +53,9 @@ function hook (hookName, hookFunction) {
   // toString for flexibility
   if (!(hookName.toString() in types)) {
     throw Error('Fatal error: Hookname ' + hook.toString() + ' does not exist')
+  }
+  if (!(typeof hookFunction === 'function')) {
+    throw Error('Fatal error: Trying to register non-function hook to type ' + hookName)
   }
   listeners[hookName.toString()].push(hookFunction)
 }

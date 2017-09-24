@@ -31,8 +31,8 @@ function loadFolderConfig (dirPath) {
   return result
 }
 
-function resolve () {
-  let nearestConfig = findConfig('.typicalrc')
+function resolve (cwd) {
+  let nearestConfig = findConfig('.typicalrc', {cwd: cwd})
   return Object.assign(
     {},
     loadConfigFile(userHomeTypicalRc),
@@ -40,9 +40,9 @@ function resolve () {
   )
 }
 
-function resolveFolderConfig () {
+function resolveFolderConfig (cwd) {
   // This should be a folder, so we don't read it, but rather traverse it.
-  let nearestConfig = findConfig('.typicalfolders')
+  let nearestConfig = findConfig('.typicalfolders', {cwd: cwd})
 
   return Object.assign(
     {},

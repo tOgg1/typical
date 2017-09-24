@@ -4,9 +4,27 @@ const cwd = process.cwd()
 const interpolationResolver = require('./interpolationResolver')
 const readdirp = require('readdirp')
 const { containsIgnoredPattern } = require('./util')
+const hooks = require('./hooks')
 
-function writeFile (path, content) {
-  fs.writeFileSync(path, content, 'utf8')
+function writeFile (_filePath, _content) {
+  const shouldWrite = hooks.emit(
+    hooks.types.beforeFileWrite,
+    {_filePath, _content}
+  )
+
+  if (!shouldWrite && shouldWrite !== undefined) {
+    return
+  }
+
+  const { filePath, content } = hooks.emit(
+    hooks.types.fileEmitContents,
+    {filePath: _filePath, content: _content}
+  ) || {filePath: _filePath, content: _content}
+  fs.writeFileSync(filePath, content, 'utf8')
+  hooks.emit(
+    hooks.types.afterFileWrite,
+    {filePath, content}
+  )
 }
 
 function writeDirectory (parentDirectory, directoryObject) {
@@ -20,43 +38,91 @@ function writeDirectory (parentDirectory, directoryObject) {
       writeFile(path.resolve(parentDirectory, fileName), fileObject)
     } else if (fileObject.constructor === Object) {
       const directoryPath = path.resolve(parentDirectory, fileName)
+      const shouldWrite = hooks.emit(
+        hooks.types.beforeDirectoryWrite,
+        {directoryPath: parentDirectory}
+      )
+      if (!shouldWrite) {
+        return
+      }
       fs.mkdirSync(directoryPath)
+      hooks.emit(
+        hooks.types.afterDirectoryWrite,
+        {directoryPath: directoryPath}
+      )
       writeDirectory(directoryPath, fileObject)
     }
   })
 }
 
 function writeFolderConfig (config, callback) {
-  let promptFunction = interpolationResolver.promptForInterpolations
+  let promptFunction = interpolationResolver.resolveFolderConfig
   if (config.__disableInterpolations__) {
     promptFunction = (_, callback) => callback({})
   }
-  promptFunction(config.__interpolations__, function (userResolvedInterpolations) {
+  promptFunction(config, function (userResolvedInterpolations) {
     readdirp({root: config.path, entryType: 'all'},
       entry => {
-        // Avoid using fullPath here, as a users folder structure apart from
+        // We avoid using fullPath here, as a users folder structure apart from
         // what's inside the config is not our concern
         if (containsIgnoredPattern(entry.path)) {
           return
         }
 
         if (entry.stat.isDirectory()) {
+          const shouldWrite = hooks.emit(
+            hooks.types.beforeDirectoryWrite,
+            {directoryPath: entry.path}
+          )
+          if (!shouldWrite) {
+            return
+          }
           const directoryPath = path.join(
-            cwd,
+            config.__cwd__,
             interpolationResolver.interpolateString(entry.path, userResolvedInterpolations)
           )
           if (!fs.existsSync(directoryPath)) {
             fs.mkdirSync(directoryPath)
           }
         } else {
-          const fileContents = fs.readFileSync(entry.fullPath, 'utf8')
+          const parentDirectoryPath = path.join(
+            config.__cwd__,
+            entry.parentDir
+          )
+          // This happens if we have ignored creation of the folder from before.
+          // Typically this happens through a hook. We should thus not attempt
+          // to write the file
+          if (!fs.existsSync(parentDirectoryPath)) {
+            return
+          }
+
+          // Filenames may also contain interpolations
           const interpolatedPath = path.join(
-            cwd,
+            config.__cwd__,
             interpolationResolver.interpolateString(entry.path, userResolvedInterpolations)
           )
+          const fileContents = interpolationResolver.interpolateString(
+            fs.readFileSync(entry.fullPath, 'utf8'),
+            userResolvedInterpolations
+          )
+          const shouldWrite = hooks.emit(
+            hooks.types.beforeFileWrite,
+            {filePath: interpolatedPath, content: fileContents}
+          )
+          if (!shouldWrite) {
+            return
+          }
+          const { filePath, content } = hooks.emit(
+            hooks.types.fileEmitContents,
+            {filePath: interpolatedPath, content: fileContents}
+          ) || {filePath: interpolatedPath, content: fileContents}
           writeFile(
-            interpolatedPath,
-            interpolationResolver.interpolateString(fileContents, userResolvedInterpolations)
+            filePath,
+            content
+          )
+          hooks.emit(
+            hooks.types.afterFileWrite,
+            {filePath: filePath, content: content}
           )
         }
       },
@@ -79,7 +145,7 @@ function writeRegularConfig (config, callback) {
   }
   // Simply resolve all interpolations right away
   promptFunction(config, function (interpolatedConfig) {
-    writeDirectory(cwd, interpolatedConfig)
+    writeDirectory(config.__cwd__, interpolatedConfig)
     if (callback) {
       callback()
     }
@@ -87,10 +153,19 @@ function writeRegularConfig (config, callback) {
 }
 
 function write (config, callback) {
+  config.__cwd__ = config.__cwd__ || cwd
+  hooks.emit(hooks.types.beforeAll, config)
+  // Create a wrapper callback emitting afterAll
+  const newCallback = () => {
+    hooks.emit(hooks.types.afterAll, config)
+    if (callback) {
+      callback()
+    }
+  }
   if (config.__isDirectory__) {
-    writeFolderConfig(config, callback)
+    writeFolderConfig(config, newCallback)
   } else {
-    writeRegularConfig(config, callback)
+    writeRegularConfig(config, newCallback)
   }
 }
 
