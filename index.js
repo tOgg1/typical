@@ -22,6 +22,8 @@ program
     configElement = _configElement
   })
   .option('-s, --scan', 'Automatically detect interpolatinos from content')
+  .option('-S, --scan-list', 'Automatically detect interpolatinos from content, and print them to stdout.')
+  .option('-I, --print-interpolations', 'Print interpolations for recipe')
   .option('-l, --list', 'List available typical recipes recipes')
   .option('-p, --print', 'Print the config selected config element to stdout')
   .option(
@@ -71,8 +73,25 @@ if (program.disableInterpolation) {
 
 // If print is true, we simply print the recipe, and exit
 if (program.print) {
-  console.log(colors.green('Typical recipe ') + '"' + colors.cyan(configElement) + '"')
   console.log(colors.gray(JSON.stringify(resolvedElement, null, 2)))
+  process.exit(0)
+}
+
+// If printInterpolations is true, we print the interpolations config of the recipe
+if (program.printInterpolations) {
+  console.log(colors.gray(JSON.stringify(resolvedElement.__interpolations__, null, 2)))
+  process.exit(0)
+}
+
+// If we scanList is true, we scan and then print.
+if (program.scanList) {
+  interpolationResolver.scan(resolvedElement, result => {
+    console.log(colors.gray(JSON.stringify(
+      (resolvedElement.__interpolations__ || []).concat(result),
+      null,
+      2
+    )))
+  })
   process.exit(0)
 }
 
