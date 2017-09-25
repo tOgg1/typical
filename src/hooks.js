@@ -34,7 +34,7 @@ function emit (hook, data) {
   }
 
   const hookListeners = listeners[hook] || []
-  return hookListeners.reduce((nextHook, acc) => {
+  return hookListeners.reduce((acc, nextHook) => {
     const nextData = nextHook(acc, data)
     if (nextData === undefined) {
       return acc
@@ -61,6 +61,61 @@ function initializeFromStrings (hookStrings) {
     requireFromString(hookString)
   })
 }
+
+function initializeFromDefaultHooksDirectory (configElement, callback) {
+  if (configElement.__isDirectory__) {
+    const hooksPath = path.resolve(configElement.path, '__hooks__')
+    if (fs.existsSync(hooksPath)) {
+      const files = []
+      readdirp({root: hooksPath},
+        file => files.push(file.fullPath),
+        err => {
+          if (err) {
+            throw err
+          }
+          initialize(
+            files.sort((x, y) => x.path === y.path ? 0 : x.path > y.path ? 1 : -1)
+          )
+          callback()
+        }
+      )
+    }
+  } else {
+    const hooks = configElement.__hooks__
+    if (hooks === undefined || hooks === null) {
+      return
+    }
+    const queue = []
+    const files = []
+    queue.push(hooks)
+
+    while (queue.length > 0) {
+      const next = queue.shift()
+      if (next.constructor === Object) {
+        Object.keys(next).forEach(key => {
+          const element = next[key]
+          if (element.constructor === String) {
+            files.push([key, next[key]])
+          } else {
+            queue.push(next[key])
+          }
+        })
+      } else if (next.constructor === Array) {
+        next.forEach(val => queue.push(val))
+      } else if (next.constructor === String) {
+        files.push(['', next])
+      }
+    }
+
+    initializeFromStrings(
+      files
+        .sort((x, y) => x[0] === y[0] ? 0 : x[0] > y[0] ? 1 : -1)
+        .map(x => x[1])
+    )
+    callback()
+  }
+}
+
 function hook (hookName, hookFunction) {
   // toString for flexibility
   if (!(hookName.toString() in types)) {
@@ -77,5 +132,6 @@ module.exports = {
   hook: hook,
   initialize: initialize,
   initializeFromStrings: initializeFromStrings,
+  initializeFromDefaultHooksDirectory,
   emit: emit
 }

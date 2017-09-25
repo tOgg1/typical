@@ -85,54 +85,55 @@ if (!config[configElement]) {
 }
 
 let resolvedElement = config[configElement]
-hooks.emit(hooks.types.recipeFound, resolvedElement)
+hooks.initializeFromDefaultHooksDirectory(resolvedElement, () => {
+  hooks.emit(hooks.types.recipeFound, resolvedElement)
 
-if (program.disableInterpolation) {
-  resolvedElement.__disableInterpolations__ = true
-}
+  if (program.disableInterpolation) {
+    resolvedElement.__disableInterpolations__ = true
+  }
 
-resolvedElement.__cwd__ = cwd
+  resolvedElement.__cwd__ = cwd
 
-// If print is true, we simply print the recipe, and exit
-if (program.print) {
-  console.log(colors.gray(JSON.stringify(resolvedElement, null, 2)))
-  process.exit(0)
-}
+  // If print is true, we simply print the recipe, and exit
+  if (program.print) {
+    console.log(colors.gray(JSON.stringify(resolvedElement, null, 2)))
+    process.exit(0)
+  }
 
-// If printInterpolations is true, we print the interpolations config of the recipe
-if (program.printInterpolations) {
-  console.log(colors.gray(JSON.stringify(resolvedElement.__interpolations__, null, 2)))
-  process.exit(0)
-}
+  // If printInterpolations is true, we print the interpolations config of the recipe
+  if (program.printInterpolations) {
+    console.log(colors.gray(JSON.stringify(resolvedElement.__interpolations__, null, 2)))
+    process.exit(0)
+  }
 
-// If we scanList is true, we scan and then print.
-if (program.scanList) {
-  interpolationResolver.scan(resolvedElement, result => {
-    console.log(colors.gray(JSON.stringify(
-      (resolvedElement.__interpolations__ || []).concat(result),
-      null,
-      2
-    )))
-  })
-  process.exit(0)
-}
+  // If we scanList is true, we scan and then print.
+  if (program.scanList) {
+    interpolationResolver.scan(resolvedElement, result => {
+      console.log(colors.gray(JSON.stringify(
+        (resolvedElement.__interpolations__ || []).concat(result),
+        null,
+        2
+      )))
+    })
+    process.exit(0)
+  }
 
-// If we have preresolved interpolations we
-if (program.interpolation) {
-  resolvedElement.__resolvedInterpolations__ = program.interpolation
-    .reduce((acc, keyVal) => {
-      const [key, val] = keyVal.split('=')
-      acc[key] = val
-      return acc
-    }, {})
-}
+  // If we have preresolved interpolations we
+  if (program.interpolation) {
+    resolvedElement.__resolvedInterpolations__ = program.interpolation
+      .reduce((acc, keyVal) => {
+        const [key, val] = keyVal.split('=')
+        acc[key] = val
+        return acc
+      }, {})
+  }
 
-if (!program.disableInterpolation && program.scan) {
-  interpolationResolver.scan(resolvedElement, (result) => {
-    resolvedElement.__interpolations__ = (resolvedElement.__interpolations__ || []).concat(result)
+  if (!program.disableInterpolation && program.scan) {
+    interpolationResolver.scan(resolvedElement, (result) => {
+      resolvedElement.__interpolations__ = (resolvedElement.__interpolations__ || []).concat(result)
+      configWriter.write(resolvedElement)
+    })
+  } else {
     configWriter.write(resolvedElement)
-  })
-} else {
-  configWriter.write(resolvedElement)
-}
-
+  }
+})
