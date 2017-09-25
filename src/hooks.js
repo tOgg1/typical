@@ -1,5 +1,8 @@
 const cwd = process.cwd()
 const path = require('path')
+const readdirp = require('readdirp')
+const requireFromString = require('require-from-string')
+const fs = require('fs')
 
 const types = {
   beforeAll: 'beforeAll',
@@ -49,6 +52,15 @@ function initialize (hookFiles) {
   })
 }
 
+function initializeFromStrings (hookStrings) {
+  if (hookStrings.constructor !== Array) {
+    throw Error('Fatal error, hooks are not an array of string')
+  }
+
+  hookStrings.forEach(hookString => {
+    requireFromString(hookString)
+  })
+}
 function hook (hookName, hookFunction) {
   // toString for flexibility
   if (!(hookName.toString() in types)) {
@@ -64,5 +76,6 @@ module.exports = {
   types: types,
   hook: hook,
   initialize: initialize,
+  initializeFromStrings: initializeFromStrings,
   emit: emit
 }
