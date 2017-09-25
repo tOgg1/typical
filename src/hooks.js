@@ -80,9 +80,11 @@ function initializeFromDefaultHooksDirectory (configElement, callback) {
         }
       )
     }
+    callback()
   } else {
     const hooks = configElement.__hooks__
     if (hooks === undefined || hooks === null) {
+      callback()
       return
     }
     const queue = []
