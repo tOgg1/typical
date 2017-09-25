@@ -78,9 +78,50 @@ function resolveRegularConfig (configElement, callback) {
     return
   }
 
-  promptForInterpolations(interpolations, function (userResolvedInterpolations) {
-    callback(interpolateRegularConfig(configElement, userResolvedInterpolations))
-  })
+  let preresolvedInterpolations = Object.keys(configElement.__resolvedInterpolations__) || []
+  interpolations = interpolations.filter(x =>
+    preresolvedInterpolations.indexOf(x) === -1 &&
+    preresolvedInterpolations.indexOf(x.name) === -1
+  )
+
+  promptForInterpolations(interpolations, (resolvedInterpolations) =>
+    callback(
+      interpolateRegularConfig(
+        configElement,
+        Object.assign(
+          {},
+          resolvedInterpolations,
+          configElement.__resolvedInterpolations__ || {}
+        )
+      )
+    )
+  )
+}
+
+function resolveFolderConfig (configElement, callback) {
+  let interpolations = configElement.__interpolations__
+  if (!interpolationsAreValid(interpolations)) {
+    callback([])
+    return
+  }
+
+  let preresolvedInterpolations = Object.keys(configElement.__resolvedInterpolations__) || []
+  interpolations = interpolations.filter(x =>
+    preresolvedInterpolations.indexOf(x) === -1 &&
+    preresolvedInterpolations.indexOf(x.name) === -1
+  )
+
+  promptForInterpolations(
+    interpolations,
+    resolvedInterpolations =>
+      callback(
+        Object.assign(
+          {},
+          resolvedInterpolations,
+          configElement.__resolvedInterpolations__ || {}
+        )
+    )
+  )
 }
 
 function scanRegularConfig (configElement, callback) {
@@ -146,6 +187,7 @@ module.exports = {
   interpolationsAreValid: interpolationsAreValid,
   promptForInterpolations: promptForInterpolations,
   resolveRegularConfig: resolveRegularConfig,
+  resolveFolderConfig: resolveFolderConfig,
   scanRegularConfig: scanRegularConfig,
   scanDirectoryConfig: scanDirectoryConfig,
   scan: scan
