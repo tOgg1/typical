@@ -1,4 +1,5 @@
 #! /usr/bin/env node
+const packageConfig = require('./package.json')
 const program = require('commander')
 const colors = require('colors')
 const configResolver = require('./src/configResolver')
@@ -23,6 +24,7 @@ function handleInterpolation (element, acc) {
 // We only really care about the first positional argument
 // giving use the correct config to use
 program
+  .version(packageConfig.version)
   .arguments('[configElement]')
   .action(_configElement => {
     configElement = _configElement
