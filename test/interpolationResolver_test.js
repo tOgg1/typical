@@ -13,13 +13,13 @@ describe('interpolationResolver', () => {
       const result = interpolationResolver.interpolateString(string, interpolations)
       expect(result).to.equal('var newVariableName = 3;')
     })
-    it('should not interpolate an eligible value which is not marked for interpolation', () => {
+    it('should simply remove interpolation format from an eligible value which is not marked for interpolation', () => {
       const string = 'What is up $${myman}'
       const interpolations = {
         'notmyman': 'epic'
       }
       const result = interpolationResolver.interpolateString(string, interpolations)
-      expect(result).to.equal(string)
+      expect(result).to.equal('What is up myman')
     })
     it('should interpolate multiple values', () => {
       const string = 'for ($${iteratorOne} = $${val1}, $${iteratorTwo} = $${val2}; $${iteratorOne} < $${iteratorTwo}; ++$${iteratorOne})'
@@ -32,19 +32,47 @@ describe('interpolationResolver', () => {
       const result = interpolationResolver.interpolateString(string, interpolations)
       expect(result).to.equal('for (i = 1, j = 500; i < j; ++i)')
     })
-    it('will interpolate an interpolation that spat out a new variable', () => {
+    it('will not interpolate an interpolation that spat out a new variable', () => {
       const string = 'Lets interpolate $${this}'
       const interpolations = {
         this: '$${that}',
         that: 'nothing'
       }
       const result = interpolationResolver.interpolateString(string, interpolations)
-      expect(result).to.equal('Lets interpolate nothing')
+      expect(result).to.equal('Lets interpolate $${that}')
     })
     it('should return the string on no interpolations', () => {
       const string = 'Just return this'
       const newString = interpolationResolver.interpolateString(string, [])
       expect(newString).to.equal(string)
+    })
+    it('should handle an interpolation with a method', () => {
+      const string = 'Lets interpolate $${this|identity}'
+      const interpolations = {
+        this: 'that'
+      }
+      const newString = interpolationResolver.interpolateString(string, interpolations)
+      expect(newString).to.equal('Lets interpolate that')
+    })
+    it('should handle an interpolation with a method that alters something', () => {
+      const string = 'Lets interpolate $${this} and $${this|upper}'
+      const interpolations = {
+        this: 'that'
+      }
+      const newString = interpolationResolver.interpolateString(string, interpolations)
+      expect(newString).to.equal('Lets interpolate that and THAT')
+    })
+    it('should handle the random stl', () => {
+      const string = 'Lets generate something random $${|random}'
+      const newString = interpolationResolver.interpolateString(string, {})
+      expect(newString).to.include('Lets generate something random')
+      expect(newString.length).to.be.above(string.length)
+    })
+    it('should handle the sha1 stl', () => {
+      const string = 'Lets generate a sha1: $${niris|sha1}'
+      const newString = interpolationResolver.interpolateString(string, {})
+      expect(newString).to.equal('Lets generate a sha1: 62553f72063865f1283786259d4f2ce76adbc02e')
+      expect(newString.length).to.be.above(string.length)
     })
   })
   describe('#interpolateRegularConfig', () => {
@@ -209,6 +237,9 @@ describe('interpolationResolver', () => {
           },
           path4: {
             '$${Hello}': 'Lets see if we can find the filename'
+          },
+          path5: {
+            'file3': 'Lets see if it can handle a method $${fileName|upper}'
           }
         }
       })
@@ -237,6 +268,12 @@ describe('interpolationResolver', () => {
     it('should discover a filename element', (done) => {
       interpolationResolver.scanDirectoryConfig({path: '.typicalfolders/path4'}, result => {
         expect(result).to.deep.equal(['Hello'])
+        done()
+      })
+    })
+    it('should should handle a method', (done) => {
+      interpolationResolver.scanDirectoryConfig({path: '.typicalfolders/path5'}, result => {
+        expect(result).to.deep.equal(['fileName'])
         done()
       })
     })
