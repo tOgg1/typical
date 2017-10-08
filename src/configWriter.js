@@ -89,8 +89,6 @@ function writeFolderConfig (config, callback) {
             config.__cwd__,
             interpolationResolver.interpolateString(entry.parentDir, userResolvedInterpolations)
           )
-          console.log(parentDirectoryPath)
-          console.log(fs.existsSync(parentDirectoryPath))
           // This happens if we have ignored creation of the folder from before.
           // Typically this happens through a hook. We should thus not attempt
           // to write the file
