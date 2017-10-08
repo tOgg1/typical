@@ -84,7 +84,11 @@ function resolveRegularConfig (configElement, callback) {
     preresolvedInterpolations.indexOf(x.name) === -1
   )
 
-  promptForInterpolations(interpolations, (resolvedInterpolations) =>
+  promptForInterpolations(interpolations, (resolvedInterpolations) => {
+    hooks.emit(
+      hooks.types.interpolationsResolved,
+      {interpolations: resolvedInterpolations}
+    )
     callback(
       interpolateRegularConfig(
         configElement,
@@ -95,7 +99,7 @@ function resolveRegularConfig (configElement, callback) {
         )
       )
     )
-  )
+  })
 }
 
 function resolveFolderConfig (configElement, callback) {
@@ -113,7 +117,11 @@ function resolveFolderConfig (configElement, callback) {
 
   promptForInterpolations(
     interpolations,
-    resolvedInterpolations =>
+    resolvedInterpolations => {
+      hooks.emit(
+        hooks.types.interpolationsResolved,
+        {interpolations: resolvedInterpolations}
+      )
       callback(
         Object.assign(
           {},
@@ -121,6 +129,7 @@ function resolveFolderConfig (configElement, callback) {
           configElement.__resolvedInterpolations__ || {}
         )
     )
+    }
   )
 }
 

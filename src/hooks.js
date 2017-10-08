@@ -13,7 +13,8 @@ const types = {
   afterFileWrite: 'afterFileWrite',
   beforeDirectoryWrite: 'beforeDirectoryWrite',
   afterDirectoryWrite: 'afterDirectoryWrite',
-  afterAll: 'afterAll'
+  afterAll: 'afterAll',
+  interpolationsResolved: 'interpolationsResolved'
 }
 
 const listeners = {
@@ -25,7 +26,8 @@ const listeners = {
   afterFileWrite: [],
   beforeDirectoryWrite: [],
   afterDirectoryWrite: [],
-  afterAll: []
+  afterAll: [],
+  interpolationsResolved: []
 }
 
 function emit (hook, data) {
@@ -80,7 +82,6 @@ function initializeFromDefaultHooksDirectory (configElement, callback) {
         }
       )
     }
-    callback()
   } else {
     const hooks = configElement.__hooks__
     if (hooks === undefined || hooks === null) {
