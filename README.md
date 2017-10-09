@@ -170,6 +170,123 @@ Will with giving interpolations of `$${myDir}` and `$${myFile}` give the expecte
 
 By default, only the variables defined in the `__interpolations__` array will be prompted for, and then interpolated. However, if the command is run with the `--scan` flag, all files will be scanned for possible interpolations (i.e. parts of the file matching our interpolation format).
 
+
+### Interpolation methods
+
+The interpolation template syntax supports methods. Interpolated variables can be piped into methods in the following way:
+
+```
+A file with some $${interpolated|upper} content.
+```
+
+Suppose we enter the value `nice` for the interpolation `interpolated`. This results in the following file:
+
+```
+A file with some NICE content.
+```
+
+Multiple methods can be chained:
+
+```
+A file with some $${interpolated|lower|upperFirst} content.
+```
+
+Suppose now that we have entered the value `CONSTANT` for the interpolation `interpolated`. This results in the following file:
+
+```
+A file with some Constant content
+```
+
+## Hooks
+
+When typical runs, events are emitted during processing. You can hook into these to perform custom processing.
+To listen to an event, you have to create a javascript file like follows:
+
+```
+const typical = require('typical.js')
+
+typical.hook(
+  typical.hooks.types.beforeAll,
+  (data) => {
+    // Do something
+  }
+)
+```
+
+All events emit a data object, or undefined. The following table contains an overview. The order of the events are roughly the order in which they are emitted.
+
+|| *Event* || *Data object* ||
+|| recipeFound || The [config-object](#Config-object_of_a_recipe) of the recipe  ||
+|| beforeAll || The [config-object](#Config-object_of_a_recipe) of the recipe  ||
+|| interpolationsResolved || An array containing all resolved interpolations ||
+|| beforeFileWrite || `{filePath, content}`||
+|| fileEmitContents || `{filePath, content}`||
+|| afterFileWrite || `{filePath, content}}`||
+|| beforeDirectoryWrite || `{directoryPath}`||
+|| afterDirectoryWrite || `{directoryPath}}`||
+|| afterAll || The [config-object](#Config-object_of_a_recipe) of the recipe ||
+
+
+## Config-object of a recipe
+
+When a recipe is found matching the users intent, a config-object is created containing the data for the recipe. The config-object takes two different shapes; depending on whether or not the recipe is a folder-recipe or a standard recipe. This is of interest when using [hooks](#hooks), as this config object
+
+### Standard recipe (.typicalrc)
+
+This is just a duplicate of the resolved .typicalrc element itself. Say the recipe of choice is `myRecipe`, in the following .typicalrc:
+
+```json
+{
+  "myRecipe": {
+    "myFile": "$${Interpolate} this",
+    "__interpolations__": [
+      "Interpolate"
+    ],
+    "__hooks__": [
+      "const typical = require('typical'); typical.hook('beforeAll', console.log);"
+    ]
+  }
+}
+
+```
+
+Then the following object would be the config-object of `myRecipe`:
+
+```json
+{
+  "myFile": "$${Interpolate} this",
+  "__interpolations__": [
+    "Interpolate"
+  ],
+  "__hooks__": [
+    "const typical = require('typical'); typical.hook('beforeAll', console.log);"
+  ],
+  "__cwd__": "/home/username/some/location"
+}
+```
+
+### Folder-recipe (.typicalfolders)
+
+For folder-recipes, the entire directory structure (with contents) are _not_ loaded into memory. And so the config-object takes a slightly different shape. Given the same config as above, just as a folder-config located in the home directory config `/home/username/.typicalfolders`, we would get the following config:
+
+```json
+{
+  "__isDirectory__": true,
+  "path": "/home/username/.typicalfolders/myRecipe",
+  "__interpolations__": [
+    "Interpolate"
+  ],
+  "__cwd__": "/home/username/some/location"
+}
+
+```
+
+Note here that we do not have any files explicitly in the config. This also includes the __hooks__ directory, which will be loaded from `path.resolve(configElement.path, '__hooks__')`.
+
+
+
+## .typicalrc vs .typicalfolders
+
 ## TODO
 
  * Support YAML-config
