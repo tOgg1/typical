@@ -213,18 +213,108 @@ typical.hook(
 )
 ```
 
+The location of the file is either in a `__hooks__` folder under a .typicalfolders recipe, or in a `__hooks__` key in a .typicalrc recipe:
+
+**.typicalfolders**:
+```
+.
+├── __hooks__
+│   ├── 01_create-react-app.js
+│   └── 02_install_dependencies.js
+├── __interpolations__
+└── src
+    ...
+```
+
+**.typicalrc**:
+```json
+{
+  "src": {
+     ...
+  },
+  "__interpolations__": [
+    "Interpolate"
+  ],
+  "__hooks__": {
+    "01_log": "const typical = require('typical'); typical.hook('beforeAll', console.log);"
+  },
+  "__cwd__": "/home/username/some/location"
+}
+```
+Note that the `__hooks__` key in a .typicalrc can either be an Array or an Object, and may contain nested data. If an Array is encountered, an element of the Array is assumed to be named the empty string `''`.
+
+Hooks are sorted alphabetically before being run, allowing user-specified precedence of the hook-scripts.
+
 All events emit a data object, or undefined. The following table contains an overview. The order of the events are roughly the order in which they are emitted.
 
-|| *Event* || *Data object* ||
-|| recipeFound || The [config-object](#Config-object_of_a_recipe) of the recipe  ||
-|| beforeAll || The [config-object](#Config-object_of_a_recipe) of the recipe  ||
-|| interpolationsResolved || An array containing all resolved interpolations ||
-|| beforeFileWrite || `{filePath, content}`||
-|| fileEmitContents || `{filePath, content}`||
-|| afterFileWrite || `{filePath, content}}`||
-|| beforeDirectoryWrite || `{directoryPath}`||
-|| afterDirectoryWrite || `{directoryPath}}`||
-|| afterAll || The [config-object](#Config-object_of_a_recipe) of the recipe ||
+| Event | Data object |
+|-------|-------------|
+| recipeFound | The [config-object](#Config-object_of_a_recipe) of the recipe  |
+| beforeAll | The [config-object](#Config-object_of_a_recipe) of the recipe  |
+| interpolationsResolved | An array containing all resolved interpolations |
+| beforeFileWrite | `{filePath, content}`|
+| fileEmitContents | `{filePath, content}`|
+| afterFileWrite | `{filePath, content}}`|
+| beforeDirectoryWrite | `{directoryPath}`|
+| afterDirectoryWrite | `{directoryPath}}`|
+| afterAll | The [config-object](#Config-object_of_a_recipe) of the recipe |
+
+### Hook events
+#### recipeFound
+
+| Description | Data given | Response on return value |
+|-------------|------------|--------------------------|
+| Called when a recipe is found matching the user's intent. | The [config-object](#Config-object_of_a_recipe) of the recipe | Will ignore the return value |
+
+#### beforeAll
+
+| Description | Data given | Response on return value |
+|-------------|------------|--------------------------|
+| Called just before typical is about to start writing | The [config-object](#Config-object_of_a_recipe) of the recipe | Will ignore the return value |
+
+#### interpolationResolved
+
+| Description | Data given | Response on return value |
+|-------------|------------|--------------------------|
+| Call when all interpolations are resolved by the user and has gotten a value. | An array containing all resolved interpolations  | Will ignore the return value |
+
+#### beforeFileWrite
+
+| Description | Data given | Response on return value |
+|-------------|------------|--------------------------|
+| Called when typical has found a new file to write. | `{filePath, content}` | If the return-value is falsy (but not undefined, i.e. 0, null or the empty string) the file will not be written. |
+
+#### fileEmitContents
+
+| Description | Data given | Response on return value |
+|-------------|------------|--------------------------|
+| This is called just before a new file is about to be created with contents. The file will now unequivocally be written. | `{filePath, content}` | If the return-data is not an Object with the same structure as the data-argument, the behaviour is undefined. If the return-data is an Object with the same structure, i.e. contains `filePath` and `content`, typical will instead write this content to the specified filePath. This permits you to write hooks overriding what content to write. |
+
+#### afterFileWrite
+
+| Description | Data given | Response on return value |
+|-------------|------------|--------------------------|
+| Called after a file is succesfully written | `{filePath, content}` | Will ignore the return value |
+
+#### beforeDirectoryWrite
+
+| Description | Data given | Response on return value |
+|-------------|------------|--------------------------|
+| Called when typical has found a new directory to write. | `{directoryPath}` | If the return-value is falsy (but not undefined, i.e. 0, null or the empty string) the directory and all its descendants will not be written. |
+
+#### afterDirectoryWrite
+
+
+| Description | Data given | Response on return value |
+|-------------|------------|--------------------------|
+| Called when typical has created a new directory. Note that this called before any descendant files are created in the directory | `{directoryPath}` | If the return-value is falsy (but not undefined, i.e. 0, null or the empty string) the directory and all its descendants will not be written. |
+
+
+#### afterAll
+
+| Description | Data given | Response on return value |
+|-------------|------------|--------------------------|
+| Called after a recipe has finished running. | The [config-object](#Config-object_of_a_recipe) of the recipe | Will ignore the return value |
 
 
 ## Config-object of a recipe
