@@ -197,6 +197,21 @@ Suppose now that we have entered the value `CONSTANT` for the interpolation `int
 A file with some Constant content
 ```
 
+Typical includes the following methods by default:
+
+| Method | Description |
+|--------|-------------|
+| sha1   | Calculates the sha1 of a string, outputted as hex |
+| sha256 | Calculates the sha256 of a string, outputted as hex |
+| upperFirst | Makes the first letter of a string uppercase, if this is defined for the letter |
+| upper | Makes the entire string uppercase, for those letters that this operation is defined |
+| lower | Makes the entire string lowercase, for those letters that this operation is defined | 
+| random | Creates a random 32-byte string, outputted in base64 |
+| randomHex | Creates a random 32-byte string, outputted in hex |
+| randomUrlSafe | Creates a random 32-byte string, outputted as url-safe base64 |
+
+#### Adding custom methods
+
 ## Hooks
 
 When typical runs, events are emitted during processing. You can hook into these to perform custom processing.
@@ -372,8 +387,6 @@ For folder-recipes, the entire directory structure (with contents) are _not_ loa
 ```
 
 Note here that we do not have any files explicitly in the config. This also includes the __hooks__ directory, which will be loaded from `path.resolve(configElement.path, '__hooks__')`.
-
-
 
 ## .typicalrc vs .typicalfolders
 
