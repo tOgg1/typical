@@ -4,7 +4,7 @@ const sha1 = crypto.createHash('sha1')
 const sha256 = crypto.createHash('sha256')
 const identity = x => x
 
-const interpolationsStandardLibrary = {
+const interpolationStandardLibrary = {
   identity,
   sha1: string => {
     sha1.update(string)
@@ -23,19 +23,19 @@ const interpolationsStandardLibrary = {
 }
 
 function get (name) {
-  return interpolationsStandardLibrary[name] || identity
+  return interpolationStandardLibrary[name] || identity
 }
 
 function set (name, func) {
-  interpolationsStandardLibrary[name] = func
+  interpolationStandardLibrary[name] = func
 }
 
 function has (name) {
-  return Object.keys(interpolationsStandardLibrary).includes(name)
+  return Object.keys(interpolationStandardLibrary).includes(name)
 }
 
 function includes (func) {
-  return Object.values(interpolationsStandardLibrary).includes(func)
+  return Object.values(interpolationStandardLibrary).includes(func)
 }
 
 module.exports = {

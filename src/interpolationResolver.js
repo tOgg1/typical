@@ -4,7 +4,7 @@ const interpolationRegex = util.interpolationRegex
 const prompt = require('prompt')
 const fs = require('fs')
 const readdirp = require('readdirp')
-const interpolationsStl = require('./interpolationsStl')
+const interpolationStl = require('./interpolationStl')
 const hooks = require('./hooks')
 
 prompt.message = ''
@@ -25,7 +25,7 @@ function interpolateString (string, interpolations) {
 
     let interpolatedValue = interpolations[interpolationContents[0]] || interpolationContents[0]
     interpolatedValue = interpolationContents.slice(1).reduce((acc, interpolationMethod) => {
-      return interpolationsStl.get(interpolationMethod)(acc)
+      return interpolationStl.get(interpolationMethod)(acc)
     }, interpolatedValue)
     patternsReplaced.push(stringToReplace)
     interpolatedString = interpolatedString.replace(
