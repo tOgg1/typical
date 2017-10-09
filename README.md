@@ -212,6 +212,20 @@ Typical includes the following methods by default:
 
 #### Adding custom methods
 
+Typical exposes methods for adding your own custom interpolation-methods, typicall through a [hook](#hooks).
+
+```js
+const stl = require('typical.js').interpolationStl
+
+stl.add('reverse', string => string.split("").reverse().join("")
+```
+
+You can now use your new method:
+
+```
+This is my reversed $${input|reverse}
+```
+
 ## Hooks
 
 When typical runs, events are emitted during processing. You can hook into these to perform custom processing.
