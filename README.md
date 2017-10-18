@@ -1,4 +1,4 @@
-[![NPM version](https://img.shields.io/badge/npm-v0.4.2-blue.svg)](https://www.npmjs.com/package/typical.js)
+[![NPM version](https://img.shields.io/badge/npm-v0.7.0-blue.svg)](https://www.npmjs.com/package/typical.js)
 [![Build Status](https://travis-ci.org/tOgg1/typical.svg?branch=develop)](https://travis-ci.org/tOgg1/typical)
 # Typical
 
