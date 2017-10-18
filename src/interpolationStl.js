@@ -17,6 +17,7 @@ const interpolationStandardLibrary = {
   upperFirst: string => string.slice(0, 1).toUpperCase() + string.slice(1),
   upper: string => string.toUpperCase(),
   lower: string => string.toLowerCase(),
+  lowerFirst: string => string.slice(0, 1).toLowerCase() + string.slice(1),
   random: () => crypto.randomBytes(32).toString('base64'),
   randomHex: () => crypto.randomBytes(32).toString('hex'),
   randomUrlSafe: () => base64url(crypto.randomBytes(32))
