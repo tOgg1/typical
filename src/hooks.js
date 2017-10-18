@@ -81,6 +81,8 @@ function initializeFromDefaultHooksDirectory (configElement, callback) {
           callback()
         }
       )
+    } else {
+      callback()
     }
   } else {
     const hooks = configElement.__hooks__
