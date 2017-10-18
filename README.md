@@ -205,7 +205,7 @@ Typical includes the following methods by default:
 | sha256 | Calculates the sha256 of a string, outputted as hex |
 | upperFirst | Makes the first letter of a string uppercase, if this is defined for the letter |
 | upper | Makes the entire string uppercase, for those letters that this operation is defined |
-| lower | Makes the entire string lowercase, for those letters that this operation is defined | 
+| lower | Makes the entire string lowercase, for those letters that this operation is defined |
 | random | Creates a random 32-byte string, outputted in base64 |
 | randomHex | Creates a random 32-byte string, outputted in hex |
 | randomUrlSafe | Creates a random 32-byte string, outputted as url-safe base64 |
