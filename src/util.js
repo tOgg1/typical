@@ -22,7 +22,7 @@ function escapeRegExp (str) {
   return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&')
 }
 
-const interpolationRegex = /\$\$\{([\w0-9]+)\}/g
+const interpolationRegex = /\$\$\{([a-zA-Z0-9|]+)\}/g
 
 module.exports = {
   escapeRegExp: escapeRegExp,

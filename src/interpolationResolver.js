@@ -4,30 +4,34 @@ const interpolationRegex = util.interpolationRegex
 const prompt = require('prompt')
 const fs = require('fs')
 const readdirp = require('readdirp')
+const interpolationStl = require('./interpolationStl')
+const hooks = require('./hooks')
 
 prompt.message = ''
 prompt.delimiter = ''
 
 prompt.start()
 
-function createInterpolationRegex (interpolationName) {
-  return new RegExp(escapeRegExp('$${' + interpolationName + '}'), 'g')
-}
-
 function interpolateString (string, interpolations) {
-  return Object.keys(interpolations).reduce(function (acc, interpolationKey) {
-    let interpolationValue = interpolations[interpolationKey]
-    return acc.replace(
-      createInterpolationRegex(interpolationKey),
-      // We replace with the interpolationValue in a function here, so we don't get
-      // the free-of-charge trickiness with "$" characters. See
-      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#Specifying_a_string_as_a_parameter
-      // for more information.
-      function () {
-        return interpolationValue
-      }
-    )
-  }, string)
+  let interpolatedString = string
+  const patternsReplaced = []
+  let match
+  while ((match = interpolationRegex.exec(string))) {
+    const stringToReplace = match[0]
+    if (patternsReplaced.includes(stringToReplace)) {
+      continue
+    }
+    const interpolationContents = match[1].split('|')
+
+    let interpolatedValue = interpolations[interpolationContents[0]] || interpolationContents[0]
+    interpolatedValue = interpolationContents.slice(1).reduce((acc, interpolationMethod) => {
+      return interpolationStl.get(interpolationMethod)(acc)
+    }, interpolatedValue)
+    patternsReplaced.push(stringToReplace)
+    interpolatedString = interpolatedString.replace(
+      new RegExp(escapeRegExp(stringToReplace), 'g'), () => interpolatedValue)
+  }
+  return interpolatedString
 }
 
 function interpolateRegularConfig (config, interpolations) {
@@ -84,7 +88,11 @@ function resolveRegularConfig (configElement, callback) {
     preresolvedInterpolations.indexOf(x.name) === -1
   )
 
-  promptForInterpolations(interpolations, (resolvedInterpolations) =>
+  promptForInterpolations(interpolations, (resolvedInterpolations) => {
+    hooks.emit(
+      hooks.types.interpolationsResolved,
+      {interpolations: resolvedInterpolations}
+    )
     callback(
       interpolateRegularConfig(
         configElement,
@@ -95,7 +103,7 @@ function resolveRegularConfig (configElement, callback) {
         )
       )
     )
-  )
+  })
 }
 
 function resolveFolderConfig (configElement, callback) {
@@ -113,14 +121,19 @@ function resolveFolderConfig (configElement, callback) {
 
   promptForInterpolations(
     interpolations,
-    resolvedInterpolations =>
+    resolvedInterpolations => {
+      hooks.emit(
+        hooks.types.interpolationsResolved,
+        {interpolations: resolvedInterpolations}
+      )
       callback(
         Object.assign(
           {},
           resolvedInterpolations,
           configElement.__resolvedInterpolations__ || {}
         )
-    )
+      )
+    }
   )
 }
 
@@ -155,7 +168,7 @@ function scanDirectoryConfig (configElement, callback) {
       // Get any interpolations in filename
       let match
       while ((match = interpolationRegex.exec(entry.path))) {
-        results.push(match[1])
+        results.push(match[1].split('|')[0])
       }
 
       if (entry.stat.isDirectory()) {
@@ -163,7 +176,7 @@ function scanDirectoryConfig (configElement, callback) {
       }
       const fileContents = fs.readFileSync(entry.fullPath, 'utf8')
       while ((match = interpolationRegex.exec(fileContents))) {
-        results.push(match[1])
+        results.push(match[1].split('|')[0])
       }
     },
     err => {
